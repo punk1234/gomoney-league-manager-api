@@ -1,0 +1,887 @@
+openapi: 3.0.0
+info:
+  title: "GoMoney Basic Football-League Manager Service"
+  description: "This service provides endpoints for all `basic football-league manager` related interactions"
+  version: 1.0.0
+  contact:
+    name: "AKEJU FATAI"
+    email: "fatai@mail.com"
+
+x-organization: gomoney
+x-service-id: api
+
+servers:
+  - description: Staging Ingress
+    url: https://api.gomoney
+
+tags:
+  - name: auth
+    description: "Authentication related endpoints"
+  - name: teams
+    description: "Team related endpoints"
+  - name: fixtures
+    description: "Fixture related endpoints"
+
+security:
+  - bearerToken: [ ]
+
+paths:
+  /auth/register:
+    post:
+      summary: "User Registration"
+      description: "User Registration"
+      operationId: registerUser
+      x-visibility: public
+      security: [ ]
+      tags:
+        - "auth"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterUserDto"
+      responses:
+        "201":
+          description: "Created"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StatusDto"
+        "400":
+          $ref: "#/components/responses/InvalidRequest"
+        "409":
+          $ref: "#/components/responses/ConflictError"
+        "default":
+          $ref: "#/components/responses/ServerError"
+
+  /auth/login:
+    post:
+      summary: "User Login"
+      description: "User Login"
+      operationId: login
+      x-visibility: public
+      security: [ ]
+      tags:
+        - "auth"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginDto"
+      responses:
+        "200":
+          description: "Success"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+        "400":
+          $ref: "#/components/responses/InvalidRequest"
+        "401":
+          $ref: "#/components/responses/Unauthenticated"
+        "429":
+          $ref: "#/components/responses/TooManyRequestError"
+        "default":
+          $ref: "#/components/responses/ServerError"
+
+  /auth/logout:
+    post:
+      summary: "User Logout"
+      description: "User Logout"
+      operationId: logout
+      x-visibility: public
+      tags:
+        - "auth"
+      responses:
+        # MAYBE USE `204` RESPONSE CODE HERE 
+        "200":
+          $ref: "#/components/responses/StatusResponse"
+        "401":
+          $ref: "#/components/responses/Unauthenticated"
+        "default":
+          $ref: "#/components/responses/ServerError"
+
+  /teams:
+    post:
+      summary: "Create Team"
+      description: "Create Team"
+      operationId: createTeam
+      x-visibility: "public"
+      tags:
+        - "teams"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTeamDto"
+      responses:
+        "201":
+          description: "Created"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Team"
+        "400":
+          $ref: "#/components/responses/InvalidRequest"
+        "401":
+          $ref: "#/components/responses/Unauthenticated"
+        "403":
+          $ref: "#/components/responses/AccessDenied"
+        "409":
+          $ref: "#/components/responses/ConflictError"
+        "default":
+          $ref: "#/components/responses/ServerError"
+
+    get:
+      summary: "Get Teams"
+      description: "Get Teams (Maybe Paginated Records - depends on the size of records)"
+      operationId: getTeams
+      x-visibility: "public"
+      tags:
+        - "teams"
+      responses:
+        "200":
+          description: "Success"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TeamListResponse"
+        "400":
+          $ref: "#/components/responses/InvalidRequest"
+        "401":
+          $ref: "#/components/responses/Unauthenticated"
+        "403":
+          $ref: "#/components/responses/AccessDenied"
+        "default":
+          $ref: "#/components/responses/ServerError"
+
+  /teams/{teamId}:
+    parameters:
+      - $ref: "#/components/parameters/teamIdParam"
+
+    patch:
+      summary: "Update Team"
+      description: "Update Team"
+      operationId: updateTeam
+      x-visibility: "public"
+      tags:
+        - "teams"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateTeamDto"
+      responses:
+        "200":
+          description: "Success"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Team"
+        "400":
+          $ref: "#/components/responses/InvalidRequest"
+        "401":
+          $ref: "#/components/responses/Unauthenticated"
+        "403":
+          $ref: "#/components/responses/AccessDenied"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/ConflictError"
+        "default":
+          $ref: "#/components/responses/ServerError"
+
+    get:
+      summary: "Get Team"
+      description: "Get Team"
+      operationId: getTeam
+      x-visibility: "public"
+      tags:
+        - "teams"
+      responses:
+        "200":
+          description: "Success"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Team"
+        "400":
+          $ref: "#/components/responses/InvalidRequest"
+        "401":
+          $ref: "#/components/responses/Unauthenticated"
+        "403":
+          $ref: "#/components/responses/AccessDenied"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "default":
+          $ref: "#/components/responses/ServerError"
+
+    delete:
+      summary: "Remove Team"
+      description: "Remove Team"
+      operationId: removeTeam
+      x-visibility: "public"
+      tags:
+        - "teams"
+      responses:
+        "200":
+          description: "Success"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StatusDto"
+        "400":
+          $ref: "#/components/responses/InvalidRequest"
+        "401":
+          $ref: "#/components/responses/Unauthenticated"
+        "403":
+          $ref: "#/components/responses/AccessDenied"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "default":
+          $ref: "#/components/responses/ServerError"
+
+  /fixtures:
+    post:
+      summary: "Create Fixture"
+      description: "Create Fixture"
+      operationId: createFixture
+      x-visibility: "public"
+      tags:
+        - "fixtures"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateFixtureDto"
+      responses:
+        "201":
+          description: "Created"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Fixture"
+        "400":
+          $ref: "#/components/responses/InvalidRequest"
+        "401":
+          $ref: "#/components/responses/Unauthenticated"
+        "403":
+          $ref: "#/components/responses/AccessDenied"
+        "409":
+          $ref: "#/components/responses/ConflictError"
+        "default":
+          $ref: "#/components/responses/ServerError"
+
+    get:
+      summary: "Get Fixtures"
+      description: "Get Fixtures (Maybe Paginated Records - depends on the size of records)"
+      operationId: getFixtures
+      x-visibility: "public"
+      tags:
+        - "fixtures"
+      responses:
+        "200":
+          description: "Success"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FixtureListResponse"
+        "400":
+          $ref: "#/components/responses/InvalidRequest"
+        "401":
+          $ref: "#/components/responses/Unauthenticated"
+        "403":
+          $ref: "#/components/responses/AccessDenied"
+        "default":
+          $ref: "#/components/responses/ServerError"
+
+  /fixtures/{fixtureId}:
+    parameters:
+      - $ref: "#/components/parameters/fixtureIdParam"
+
+    patch:
+      summary: "Update Fixture"
+      description: "Update Fixture"
+      operationId: updateFixture
+      x-visibility: "public"
+      tags:
+        - "fixtures"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateFixtureDto"
+      responses:
+        "200":
+          description: "Success"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Fixture"
+        "400":
+          $ref: "#/components/responses/InvalidRequest"
+        "401":
+          $ref: "#/components/responses/Unauthenticated"
+        "403":
+          $ref: "#/components/responses/AccessDenied"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/ConflictError"
+        "default":
+          $ref: "#/components/responses/ServerError"
+
+    get:
+      summary: "Get Fixture"
+      description: "Get Fixture"
+      operationId: getFixture
+      x-visibility: "public"
+      tags:
+        - "fixtures"
+      responses:
+        "200":
+          description: "Success"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Fixture"
+        "400":
+          $ref: "#/components/responses/InvalidRequest"
+        "401":
+          $ref: "#/components/responses/Unauthenticated"
+        "403":
+          $ref: "#/components/responses/AccessDenied"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "default":
+          $ref: "#/components/responses/ServerError"
+
+    delete:
+      summary: "Remove Fixture"
+      description: "Remove Fixture"
+      operationId: removeFixture
+      x-visibility: "public"
+      tags:
+        - "fixtures"
+      responses:
+        "200":
+          description: "Success"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StatusDto"
+        "400":
+          $ref: "#/components/responses/InvalidRequest"
+        "401":
+          $ref: "#/components/responses/Unauthenticated"
+        "403":
+          $ref: "#/components/responses/AccessDenied"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "default":
+          $ref: "#/components/responses/ServerError"
+  
+components:
+  schemas:
+    # REQUEST OBJECT DEFINITIONS
+
+    RegisterUserDto:
+      type: "object"
+      additionalProperties: false
+      required:
+        - "email"
+        - "password"
+        - "isAdmin"
+      properties:
+        email:
+          type: "string"
+          format: "email"
+          description: "User's email"
+        password:
+          type: "string"
+          minLength: 4
+        isAdmin:
+          type: "boolean"
+          description: "Indicates if user should be an admin or just a normal user"
+        firstName:
+          type: "string"
+          minLength: 2
+          description: "User's first-name"
+        lastName:
+          type: "string"
+          minLength: 2
+          description: "User's first-name"
+
+    LoginDto:
+      type: "object"
+      additionalProperties: false
+      required:
+        - "email"
+        - "password"
+      properties:
+        email:
+          type: "string"
+          format: "email"
+          description: "User's email"
+        password:
+          type: string
+          minLength: 4
+
+    CreateTeamDto:
+      type: "object"
+      description: "Create Team request data"
+      additionalProperties: false
+      required:
+        - "name"
+        - "code"
+      properties:
+        name:
+          type: "string"
+          minLength: 2
+        code:
+          type: "string"
+          minLength: 3
+          maxLength: 3
+        logoUrl:
+          type: "string"
+          format: "url"
+
+    UpdateTeamDto:
+      type: "object"
+      description: "Update Team request data"
+      additionalProperties: false
+      minProperties: 1
+      properties:
+        name:
+          type: "string"
+          minLength: 2
+        code:
+          type: "string"
+          minLength: 3
+          maxLength: 3
+        logoUrl:
+          type: "string"
+          format: "url"
+
+    CreateFixtureDto:
+      type: "object"
+      description: "Create Fixture request data"
+      additionalProperties: false
+      required:
+        - "homeTeamId"
+        - "awayTeamId"
+        - "commencesAt"
+      properties:
+        homeTeamId:
+          type: "string"
+          format: "uuid"
+          description: "ID of Home Team"
+        awayTeamId:
+          type: "string"
+          format: "uuid"
+          description: "ID of Away Team"
+        commencesAt:
+          type: "string"
+          format: "date-time"
+          description: "Date & Time that match starts"
+
+    UpdateFixtureDto:
+      type: "object"
+      description: "Update Fixture request data"
+      additionalProperties: false
+      minProperties: 1
+      properties:
+        homeTeamId:
+          type: "string"
+          format: "uuid"
+          description: "ID of Home Team"
+        awayTeamId:
+          type: "string"
+          format: "uuid"
+          description: "ID of Away Team"
+        commencesAt:
+          type: "string"
+          format: "date-time"
+          description: "Date & Time that match starts"
+        matchResult:
+          $ref: "#/components/schemas/MatchResult"
+
+    # RESPONSE OBJECT DEFINITIONS
+
+    LoginResponse:
+      type: "object"
+      required:
+        - "user"
+        - "token"
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+        token:
+          type: "string"
+          minLength: 10
+          description: "User authentication token (JWT)"
+
+    User:
+      type: "object"
+      required:
+        - "id"
+        - "email"
+        - "isAdmin"
+        - "createdAt"
+      properties:
+        id:
+          type: "string"
+          format: "uuid"
+          description: "User unique identifier"
+        email:
+          type: "string"
+          format: "email"
+          description: "User's email"
+        isAdmin:
+          type: "boolean"
+        firstName:
+          type: "string"
+          minLength: 2
+          description: "User's first-name"
+        lastName:
+          type: "string"
+          minLength: 2
+          description: "User's last-name"
+        createdAt:
+          type: "string"
+          format: "date-time"
+
+    Team:
+      type: "object"
+      description: "Team object"
+      required:
+        - "id"
+        - "name"
+        - "code"
+      properties:
+        id:
+          type: "string"
+          format: "uuid"
+          description: "Team unique identifier"
+        name:
+          type: "string"
+          minLength: 2
+        code:
+          type: "string"
+          minLength: 3
+          maxLength: 3
+        logoUrl:
+          type: "string"
+          format: "url"
+        createdBy:
+          type: "string"
+          format: "uuid"
+        updatedBy:
+          type: "string"
+          format: "uuid"
+        createdAt:
+          type: "string"
+          format: "date-time"
+        updatedAt:
+          type: "string"
+          format: "date-time"
+
+    TeamListResponse:
+      # TO BE UPDATED TO THE PAGINATED RESPONSE FORMAT
+      type: "object"
+      required:
+        - records
+      properties:
+        records:
+          type: "array"
+          items:
+            $ref: '#/components/schemas/Team'
+
+    Fixture:
+      type: "object"
+      description: "Fixture object"
+      required:
+        - "id"
+        - "homeTeamId"
+        - "awayTeamId"
+        - "commencesAt"
+        - "status"
+      properties:
+        id:
+          type: "string"
+          format: "uuid"
+          description: "Fixture unique identifier"
+        homeTeamId:
+          type: "string"
+          format: "uuid"
+          description: "ID of Home Team"
+        awayTeamId:
+          type: "string"
+          format: "uuid"
+          description: "ID of Away Team"
+        commencesAt:
+          type: "string"
+          format: "date-time"
+          description: "Date & Time that match starts"
+        status:
+          $ref: "#/components/schemas/FixtureStatus"
+        matchResult:
+          $ref: "#/components/schemas/MatchResult"
+        createdBy:
+          type: "string"
+          format: "uuid"
+        updatedBy:
+          type: "string"
+          format: "uuid"
+        createdAt:
+          type: "string"
+          format: "date-time"
+        updatedAt:
+          type: "string"
+          format: "date-time"
+
+    FixtureListResponse:
+      # TO BE UPDATED TO THE PAGINATED RESPONSE FORMAT
+      type: "object"
+      required:
+        - records
+      properties:
+        records:
+          type: "array"
+          items:
+            $ref: '#/components/schemas/Fixture'
+
+    MatchResult:
+      type: "object"
+      description: "Match-Result object"
+      required:
+        - "homeTeamScore"
+        - "awayTeamScore"
+      properties:
+        homeTeamScore:
+          type: "integer"
+          minimum: 0
+          description: "Score of Home Team"
+        awayTeamScore:
+          type: "integer"
+          minimum: 0
+          description: "Score of Away Team"
+
+    StatusDto:
+      description: Status data, check additional message field.
+      type: object
+      required:
+        - success
+      properties:
+        success:
+          description: >-
+            Status can be successful or failed, a value of true indicates
+            success.
+          type: boolean
+          example: true
+        message:
+          type: string
+          description: additional message describing status.
+        data:
+          type: object
+          additionalProperties:
+            type: object
+            properties: {}
+          description: Data associated with the status, this will not always be present
+        error:
+          $ref: '#/components/schemas/ErrorMessageDto'
+      x-common-model: StatusDto
+
+    ErrorMessageDto:
+      description: >-
+        Default error object for services. This gives consistent error object
+        that all services may use.
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          description: Error code
+          example: UNKNOWN_ERROR
+        message:
+          type: string
+          description: Descriptive error message
+          example: Request could not be completed due to an error
+        data:
+          type: object
+          description: Additional data for this error message.
+          additionalProperties: true
+          properties: {}
+      x-common-model: ErrorMessageDto
+
+    # ENUM DEFINITIONS
+
+    FixtureStatus:
+      type: "string"
+      description: "Possible States or Statuses of a Fixture"
+      enum: &FixtureStatus
+        - PENDING
+        - COMPLETED
+
+  parameters:
+    # userIdParam:
+    #   in: "path"
+    #   name: "userId"
+    #   schema:
+    #     type: "string"
+    #     format: "uuid"
+    #   required: true
+    #   description: "User identifier in path"
+
+    teamIdParam:
+      in: "path"
+      name: "teamId"
+      schema:
+        type: "string"
+        format: "uuid"
+      required: true
+      description: "Team identifier in path"
+
+    fixtureIdParam:
+      in: "path"
+      name: "fixtureId"
+      schema:
+        type: "string"
+        format: "uuid"
+      required: true
+      description: "Fixture identifier in path"
+
+    pageQuery:
+      in: "query"
+      name: page
+      schema:
+        type: "integer"
+        format: "int32"
+        minimum: 1
+        description: "Positive integer"
+      required: false
+      description: Page to be gotten based on size parameters
+
+    limitQuery:
+      in: "query"
+      name: limit
+      schema:
+        type: "integer"
+        format: "int32"
+        minimum: 1
+        description: "Positive integer"
+      required: false
+      description: Number of items to be gotten per page
+
+    sortQuery:
+      in: "query"
+      name: sort
+      schema:
+        type: "string"
+        pattern: '^([a-zA-Z]{2,}(:asc|:desc)?)+(?:(,([a-zA-Z]{2,}(:asc|:desc)?))*)$'
+      required: false
+      allowReserved: true
+      description: Sort string used to sort various fields in `asc` or `desc` order. E.g. `name:asc,createdAt:desc`
+
+  responses:
+    StatusResponse:
+      description: Request status
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/StatusDto"
+          example:
+            success: true
+            message: 'Action completed successfully'
+            data:
+              label: name of service
+              expiry: date
+
+    InvalidRequest:
+      description: Request could not be validated
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorMessageDto"
+          example:
+            code: 'BAD_REQUEST'
+            message: 'Request could not be validated.'
+
+    Unauthenticated:
+      description: Client is not authenticated to make request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorMessageDto"
+          example:
+            code: 'UNAUTHENTICATED'
+            message: 'Either client security header is missing or it is not valid.'
+
+    AccessDenied:
+      description: Expected permission is not available.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorMessageDto"
+          example:
+            code: 'ACCESS_DENIED'
+            message: 'Expected permission or scope is not present.'
+
+    NotFound:
+      description: Entity was not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorMessageDto"
+          example:
+            code: 'NOT_FOUND'
+            message: 'Information could not be found'
+
+    ConflictError:
+      description: Entity already exist while user tries to create it.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorMessageDto"
+          example:
+            code: 'ACCESS_DENIED'
+            message: 'Entity already exist!'
+
+    UnprocessableError:
+      description: Entity could not be processed.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorMessageDto"
+          example:
+            code: 'UNPROCESSABLE'
+            message: 'Sorry we could not process your request'
+
+    TooManyRequestError:
+      description: Too many requests.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorMessageDto"
+          example:
+            code: 'TOO_MANY_REQUESTS'
+            message: 'Too many requests. Please try again later!'
+
+    ServerError:
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorMessageDto"
+          example:
+            code: 'INTERNAL_ERROR'
+            message: 'An internal server error occurred.'
+
+  securitySchemes:
+    bearerToken:
+      type: "http"
+      scheme: "bearer"
+      bearerFormat: "JWT"
+      description: "Authentication for user-facing endpoints. Uses bearer token in API prefix."
