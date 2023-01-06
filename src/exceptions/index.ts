@@ -1,11 +1,11 @@
-import CustomError from "./CustomError";
-import ServerError from "./ServerError";
-import NotFoundError from "./NotFoundError";
-import ConflictError from "./ConflictError";
-import BadRequestError from "./BadRequestError";
-import UnauthorizedError from "./UnauthorizedError";
-import UnprocessableError from "./UnprocessableError";
-import UnauthenticatedError from "./UnauthenticatedError";
+import CustomError from "./custom.error";
+import ServerError from "./server.error";
+import NotFoundError from "./not-found.error";
+import ConflictError from "./conflict.error";
+import BadRequestError from "./bad-request.error";
+import UnauthorizedError from "./unauthorized.error";
+import UnprocessableError from "./unprocessable.error";
+import UnauthenticatedError from "./unauthenticated.error";
 
 export {
   CustomError,

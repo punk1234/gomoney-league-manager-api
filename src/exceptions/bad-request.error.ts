@@ -1,5 +1,5 @@
 import K from "../constants";
-import CustomError from "./CustomError";
+import CustomError from "./custom.error";
 
 /**
  * @class BadRequestError
