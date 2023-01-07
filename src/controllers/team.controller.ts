@@ -39,6 +39,6 @@ export class TeamController {
       req.auth?.userId as string,
     );
 
-    ResponseHandler.created(res, TEAM);
+    ResponseHandler.ok(res, TEAM);
   }
 }
