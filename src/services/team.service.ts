@@ -102,6 +102,22 @@ export class TeamService {
   }
 
   /**
+   * @method checkThatTeamsExist
+   * @async
+   * @param {Array<string>} teamIds 
+   * @returns {Promise<Array<ITeam>>}
+   */
+  async checkThatTeamsExist(teamIds: Array<string>): Promise<Array<ITeam>> {
+    const FOUND_TEAMS = await TeamModel.find({ _id: { $in: teamIds } });
+
+    if (FOUND_TEAMS.length < teamIds.length) {
+      throw new NotFoundError("One or both teams does not exist!");
+    }
+
+    return FOUND_TEAMS;
+  }
+
+  /**
    * @method checkThatTeamDoesNotExist
    * @async
    * @param {string} name
