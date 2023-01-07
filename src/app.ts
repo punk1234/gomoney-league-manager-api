@@ -56,7 +56,7 @@ export default class App {
 
     await Promise.all([
       this.mongoConnector.connect(config.MONGODB_URL),
-      this.redisConnector.connect(config.REDIS_URL)
+      this.redisConnector.connect(config.REDIS_URL),
     ]);
 
     // TODO: SEED DATABASE
@@ -139,10 +139,7 @@ export default class App {
     this.connection?.close();
 
     if (closeDataStores) {
-      await Promise.all([
-        this.mongoConnector.disconnect(),
-        this.redisConnector.disconnect()
-      ]);
+      await Promise.all([this.mongoConnector.disconnect(), this.redisConnector.disconnect()]);
     }
   }
 }
