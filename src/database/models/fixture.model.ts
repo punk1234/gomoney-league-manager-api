@@ -50,4 +50,8 @@ const FixtureSchema = new Schema(
   },
 );
 
+// NOTE: SINGLE INDEX ON `homeTeamId` is ENOUGH AS COMPOUND INDEX MIGHT BE EXPENSIVE.
+// INDEX WILL BE HELPFUL WHEN TRYING TO CHECK THAT A FIXTURE EXIST OR NOT
+FixtureSchema.index({ homeTeamId: 1 });
+
 export default model<IFixture>("fixtures", FixtureSchema);
