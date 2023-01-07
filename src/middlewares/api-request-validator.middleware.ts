@@ -38,6 +38,13 @@ export const apiRequestValidator = (specPath: string) => {
         },
       },
       {
+        name: "object-id",
+        type: "string",
+        validate: (value: any) => {
+          return C.Regex.OBJECT_ID.test(value);
+        },
+      },
+      {
         name: "date",
         type: "string",
         validate: (value: any) => {

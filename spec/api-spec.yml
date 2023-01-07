@@ -740,7 +740,7 @@ components:
       name: "teamId"
       schema:
         type: "string"
-        format: "uuid"
+        format: "object-id"
       required: true
       description: "Team identifier in path"
 
