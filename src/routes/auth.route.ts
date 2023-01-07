@@ -7,4 +7,7 @@ const controller = Container.get(AuthController);
 
 router.post("/register", controller.register);
 
+// TODO: IMPLEMENT & ADD RATE-LIMIT MIDDLEWARE
+router.post("/login", controller.login);
+
 export default router;
