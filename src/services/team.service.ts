@@ -1,9 +1,9 @@
 import C from "../constants";
 import { Service } from "typedi";
+import { ITeam } from "../database/types/team.type";
+import TeamModel from "../database/models/team.model";
 import { CreateTeamDto, UpdateTeamDto } from "../models";
 import { BadRequestError, ConflictError, NotFoundError, ServerError } from "../exceptions";
-import TeamModel from "../database/models/team.model";
-import { ITeam } from "../database/types/team.type";
 
 @Service()
 export class TeamService {
@@ -73,6 +73,16 @@ export class TeamService {
     }
 
     return UPDATED_TEAM;
+  }
+
+  /**
+   * @method getTeam
+   * @async
+   * @param {string} teamId
+   * @returns {Promise<ITeam>}
+   */
+  async getTeam(teamId: string): Promise<ITeam> {
+    return this.checkThatTeamExist(teamId);
   }
 
   /**
