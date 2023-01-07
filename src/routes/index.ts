@@ -2,6 +2,7 @@ import path from "path";
 import { Application } from "express";
 import rootRouter from "./root.route";
 import authRouter from "./auth.route";
+import teamRouter from "./team.route";
 import { apiRequestValidator, notFoundHandler } from "../middlewares";
 
 const API_SPEC_PATH: string = path.resolve(__dirname, "../../spec/api-spec.yml");
@@ -20,6 +21,7 @@ export default class RouteManager {
     app.use(rootRouter);
     app.use(apiRequestValidator(API_SPEC_PATH));
     app.use("/auth", authRouter);
+    app.use("/teams", teamRouter);
     app.use(notFoundHandler);
   }
 }
