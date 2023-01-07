@@ -42,29 +42,33 @@ export class FixtureService {
    * @param {string} actionBy
    * @returns {Promise<IFixture>}
    */
-  async updateFixture(fixtureId: string, data: UpdateFixtureDto, actionBy: string): Promise<IFixture> {
+  async updateFixture(
+    fixtureId: string,
+    data: UpdateFixtureDto,
+    actionBy: string,
+  ): Promise<IFixture> {
     if (data.commencesAt && new Date(data.commencesAt).getTime() < Date.now()) {
       throw new UnprocessableError("Fixture start-date must be in the future");
     }
-    
+
     const FIXTURE = await this.checkThatFixtureExist(fixtureId);
 
     let { homeTeamId, awayTeamId } = FIXTURE;
     const FILTERS: Array<string> = [];
 
-    if(data.homeTeamId) {
+    if (data.homeTeamId) {
       FILTERS.push(data.homeTeamId) && (homeTeamId = data.homeTeamId);
     }
 
-    if(data.awayTeamId) {
+    if (data.awayTeamId) {
       FILTERS.push(data.awayTeamId) && (awayTeamId = data.awayTeamId);
     }
 
-    if(homeTeamId == awayTeamId) {
+    if (homeTeamId == awayTeamId) {
       throw new ConflictError("Home & away teams cannot be the same!");
     }
 
-    if(FILTERS.length) {
+    if (FILTERS.length) {
       // NOTE: IF WE HAVE 1 ITEM, AND IT DOES NOT EXIST, ERROR MSG MIGHT BE INVALID SAYING `ONE OR MORE...`
       await this.teamService.checkThatTeamsExist(FILTERS);
       await this.checkThatFixtureDoesNotExist(homeTeamId, awayTeamId);
@@ -73,11 +77,12 @@ export class FixtureService {
     // TODO: HANDLE MATCH-RESULT UPDATE
 
     const UPDATED_FIXTURE = await FixtureModel.findOneAndUpdate(
-        { _id: fixtureId }, { ...data, updatedBy: actionBy },
-        { new: true }
+      { _id: fixtureId },
+      { ...data, updatedBy: actionBy },
+      { new: true },
     );
 
-    if(UPDATED_FIXTURE) {
+    if (UPDATED_FIXTURE) {
       return UPDATED_FIXTURE;
     }
 
