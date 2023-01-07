@@ -8,4 +8,6 @@ const controller = Container.get(FixtureController);
 
 router.post("/", requireAuth(true), controller.createFixture);
 
+router.get("/:fixtureId", requireAuth(true), controller.getFixture);
+
 export default router;
