@@ -53,7 +53,7 @@ export class FixtureService {
   async removeFixture(fixtureId: string): Promise<void> {
     const DELETION_RESULT = await FixtureModel.deleteOne({ _id: fixtureId });
 
-    if(!DELETION_RESULT.deletedCount) {
+    if (!DELETION_RESULT.deletedCount) {
       throw new NotFoundError("Fixture not found!");
     }
   }
