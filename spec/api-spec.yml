@@ -474,11 +474,11 @@ components:
       properties:
         homeTeamId:
           type: "string"
-          format: "uuid"
+          format: "object-id"
           description: "ID of Home Team"
         awayTeamId:
           type: "string"
-          format: "uuid"
+          format: "object-id"
           description: "ID of Away Team"
         commencesAt:
           type: "string"
