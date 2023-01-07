@@ -11,7 +11,7 @@ const TeamSchema = new Schema(
     code: {
       type: String,
       required: true,
-      unique: true
+      unique: true,
     },
     logoUrl: {
       type: String,
@@ -19,9 +19,9 @@ const TeamSchema = new Schema(
     },
     createdBy: {
       type: String,
-      required: true
+      required: true,
     },
-    updatedBy: { type: String }
+    updatedBy: { type: String },
   },
   {
     timestamps: true,

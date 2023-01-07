@@ -1,10 +1,6 @@
-import C from "../constants";
 import { Service } from "typedi";
-import { PasswordHasher } from "../helpers";
 import { CreateTeamDto } from "../models";
-import { IUser } from "../database/types/user.type";
-import UserModel from "../database/models/user.model";
-import { ConflictError, UnauthenticatedError } from "../exceptions";
+import { ConflictError } from "../exceptions";
 import TeamModel from "../database/models/team.model";
 import { ITeam } from "../database/types/team.type";
 
@@ -21,8 +17,7 @@ export class TeamService {
     try {
       const TEAM = new TeamModel({ ...data, createdBy });
       return await TEAM.save();
-    } catch(err: any) {
-        
+    } catch (err: any) {
       this.handleDbUniqueConstraintError(err, "Team", "name");
       this.handleDbUniqueConstraintError(err, "Team", "code");
 
@@ -32,17 +27,24 @@ export class TeamService {
 
   /**
    * @method handleDbUniqueConstraintError
-   * @param {any} err 
-   * @param {string} entity 
-   * @param {string} possibleConstraintField 
+   * @param {any} err
+   * @param {string} entity
+   * @param {string} possibleConstraintField
    */
-  // TODO: MOVE TO DB-HELPER CLASS
-  private handleDbUniqueConstraintError(err: any, entity: string, possibleConstraintField: string): void {
-    if(err.name == "MongoServerError" && err.code === 11000 && err.keyPattern[possibleConstraintField]) {
+  // TODO: MOVE TO DB-HELPER CLASS & ALSO SUPPORT ARRAY
+  private handleDbUniqueConstraintError(
+    err: any,
+    entity: string,
+    possibleConstraintField: string,
+  ): void {
+    if (
+      err.name == "MongoServerError" &&
+      err.code === 11000 &&
+      err.keyPattern[possibleConstraintField]
+    ) {
       throw new ConflictError(
-        `${entity} ${possibleConstraintField} '${err.keyValue[possibleConstraintField]}' already exist!`
+        `${entity} ${possibleConstraintField} '${err.keyValue[possibleConstraintField]}' already exist!`,
       );
     }
   }
-
 }
