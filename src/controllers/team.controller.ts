@@ -41,4 +41,16 @@ export class TeamController {
 
     ResponseHandler.ok(res, TEAM);
   }
+
+  /**
+   * @method getTeam
+   * @async
+   * @param {Request} req
+   * @param {Response} res
+   */
+  async getTeam(req: Request, res: Response) {
+    const TEAM = await this.teamService.getTeam(req.params.teamId);
+
+    ResponseHandler.ok(res, TEAM);
+  }
 }
