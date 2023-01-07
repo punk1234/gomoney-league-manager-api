@@ -7,12 +7,12 @@ const FixtureSchema = new Schema(
     homeTeamId: {
       type: Types.ObjectId,
       required: true,
-      ref: "TeamModel"
+      ref: "TeamModel",
     },
     awayTeamId: {
       type: Types.ObjectId,
       required: true,
-      ref: "TeamModel"
+      ref: "TeamModel",
     },
     commencesAt: {
       type: Date,
@@ -21,14 +21,14 @@ const FixtureSchema = new Schema(
     status: {
       type: String,
       enum: Object.values(FixtureStatus),
-      default: FixtureStatus.PENDING
+      default: FixtureStatus.PENDING,
     },
     matchResult: {
       type: {
         homeTeamScore: { type: Number },
-        awayTeamScore: { type: Number }
+        awayTeamScore: { type: Number },
       },
-      required: false
+      required: false,
     },
     createdBy: {
       type: String,

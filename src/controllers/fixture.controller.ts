@@ -25,5 +25,4 @@ export class FixtureController {
 
     ResponseHandler.created(res, FIXTURE);
   }
-
 }
