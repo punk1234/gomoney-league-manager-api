@@ -749,7 +749,7 @@ components:
       name: "fixtureId"
       schema:
         type: "string"
-        format: "uuid"
+        format: "object-id"
       required: true
       description: "Fixture identifier in path"
 

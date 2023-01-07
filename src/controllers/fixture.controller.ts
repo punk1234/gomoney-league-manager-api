@@ -25,4 +25,16 @@ export class FixtureController {
 
     ResponseHandler.created(res, FIXTURE);
   }
+
+  /**
+   * @method getFixture
+   * @async
+   * @param {Request} req
+   * @param {Response} res
+   */
+  async getFixture(req: Request, res: Response) {
+    const FIXTURE = await this.fixtureService.getFixture(req.params.fixtureId);
+
+    ResponseHandler.ok(res, FIXTURE);
+  }
 }

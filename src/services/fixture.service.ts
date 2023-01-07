@@ -3,7 +3,7 @@ import { CreateFixtureDto } from "../models";
 import { TeamService } from "./team.service";
 import { IFixture } from "../database/types/fixture.type";
 import FixtureModel from "../database/models/fixture.model";
-import { ConflictError, UnprocessableError } from "../exceptions";
+import { ConflictError, NotFoundError, UnprocessableError } from "../exceptions";
 
 @Service()
 export class FixtureService {
@@ -35,6 +35,16 @@ export class FixtureService {
   }
 
   /**
+   * @method getFixture
+   * @async
+   * @param {string} fixtureId
+   * @returns {Promise<IFixture>}
+   */
+  async getFixture(fixtureId: string): Promise<IFixture> {
+    return this.checkThatFixtureExist(fixtureId);
+  }
+
+  /**
    * @method checkThatFixtureDoesNotExist
    * @async
    * @param {string} homeTeamId
@@ -49,5 +59,21 @@ export class FixtureService {
     if (FIXTURE) {
       throw new ConflictError("Fixture already exist!");
     }
+  }
+
+  /**
+   * @method checkThatFixtureExist
+   * @async
+   * @param {string} fixtureId
+   * @returns {Promise<IFixture>}
+   */
+  private async checkThatFixtureExist(fixtureId: string): Promise<IFixture> {
+    const FIXTURE = await FixtureModel.findById(fixtureId);
+
+    if (FIXTURE) {
+      return FIXTURE;
+    }
+
+    throw new NotFoundError("Fixture not found!");
   }
 }
