@@ -45,6 +45,20 @@ export class FixtureService {
   }
 
   /**
+   * @method removeFixture
+   * @async
+   * @param {string} fixtureId
+   * @returns {Promise<void>}
+   */
+  async removeFixture(fixtureId: string): Promise<void> {
+    const DELETION_RESULT = await FixtureModel.deleteOne({ _id: fixtureId });
+
+    if (!DELETION_RESULT.deletedCount) {
+      throw new NotFoundError("Fixture not found!");
+    }
+  }
+
+  /**
    * @method checkThatFixtureDoesNotExist
    * @async
    * @param {string} homeTeamId
