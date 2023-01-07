@@ -5,7 +5,7 @@ import { NextFunction, Request, Response } from "express";
 
 /**
  * @function requireAuth
- * @param {Array<Role>} allowedRoles
+ * @param {boolean} forAdmin
  * @returns {Function}
  */
 export const requireAuth = (forAdmin?: boolean) => {
