@@ -8,4 +8,6 @@ const controller = Container.get(TeamController);
 
 router.post("/", requireAuth(true), controller.createTeam);
 
+router.patch("/:teamId", requireAuth(true), controller.updateTeam);
+
 export default router;

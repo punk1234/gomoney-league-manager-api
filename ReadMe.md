@@ -13,3 +13,9 @@ N/A
 - Typescript (Programming language)
 - MongoDB (NoSQL database)
 - Redis (Caching)
+
+## ASSUMPTIONS
+- N/A
+
+## OPTIMIZATIONS
+- N/A
