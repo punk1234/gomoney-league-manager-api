@@ -101,6 +101,12 @@ export class TeamService {
     throw new NotFoundError("Team not found!");
   }
 
+  /**
+   * @method checkThatTeamsExist
+   * @async
+   * @param {Array<string>} teamIds 
+   * @returns {Promise<Array<ITeam>>}
+   */
   async checkThatTeamsExist(teamIds: Array<string>): Promise<Array<ITeam>> {
     const FOUND_TEAMS = await TeamModel.find({ _id: { $in: teamIds } });
 
