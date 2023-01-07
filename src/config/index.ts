@@ -11,5 +11,5 @@ export default {
   MONGODB_URL: env.MONGODB_URL || "",
   REDIS_URL: env.REDIS_URL || "",
   JWT_TOKEN_SECRET: env.JWT_TOKEN_SECRET || "",
-  AUTH_TOKEN_TTL_IN_HOURS: `${env.AUTH_TOKEN_TTL_IN_HOURS || "6"}h`
+  AUTH_TOKEN_TTL_IN_HOURS: `${env.AUTH_TOKEN_TTL_IN_HOURS || "6"}h`,
 };

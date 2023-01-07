@@ -22,5 +22,4 @@ export class AuthController {
 
     ResponseHandler.created(res, { success: true });
   }
-
 }

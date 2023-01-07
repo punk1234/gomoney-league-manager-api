@@ -16,8 +16,7 @@ export class AuthService {
    */
   async register(data: RegisterUserDto): Promise<IUser> {
     await this.userService.checkThatUserWithEmailDoesNotExist(data.email);
-    
+
     return this.userService.createUser(data);
   }
-
 }

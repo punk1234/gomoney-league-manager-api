@@ -1,15 +1,9 @@
-import C from "../constants";
 import { Service } from "typedi";
 import { PasswordHasher } from "../helpers";
 import { RegisterUserDto } from "../models";
 import { IUser } from "../database/types/user.type";
 import UserModel from "../database/models/user.model";
-import {
-  ConflictError,
-  NotFoundError,
-  UnauthenticatedError,
-  UnprocessableError,
-} from "../exceptions";
+import { ConflictError } from "../exceptions";
 
 @Service()
 export class UserService {
@@ -24,7 +18,7 @@ export class UserService {
 
     const USER = new UserModel({
       ...data,
-      password: PASSWORD_HASH
+      password: PASSWORD_HASH,
     });
 
     return USER.save();
@@ -42,5 +36,4 @@ export class UserService {
       throw new ConflictError("User already exist!");
     }
   }
-
 }

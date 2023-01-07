@@ -9,5 +9,5 @@ export default {
   Environment,
   HttpStatusCode,
   ResponseMessage,
-  UserIdentifier
+  UserIdentifier,
 };
