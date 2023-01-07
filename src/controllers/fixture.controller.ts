@@ -37,4 +37,16 @@ export class FixtureController {
 
     ResponseHandler.ok(res, FIXTURE);
   }
+
+  /**
+   * @method removeFixture
+   * @async
+   * @param {Request} req
+   * @param {Response} res
+   */
+  async removeFixture(req: Request, res: Response) {
+    await this.fixtureService.removeFixture(req.params.fixtureId);
+
+    ResponseHandler.ok(res, { success: true });
+  }
 }
