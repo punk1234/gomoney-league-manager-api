@@ -104,7 +104,7 @@ export class TeamService {
   /**
    * @method checkThatTeamsExist
    * @async
-   * @param {Array<string>} teamIds 
+   * @param {Array<string>} teamIds
    * @returns {Promise<Array<ITeam>>}
    */
   async checkThatTeamsExist(teamIds: Array<string>): Promise<Array<ITeam>> {
