@@ -13,7 +13,7 @@ export class TeamController {
   // eslint-disable-next-line no-useless-constructor
   constructor(
     @Inject() private readonly teamService: TeamService,
-    @Inject() private readonly fixtureService: FixtureService
+    @Inject() private readonly fixtureService: FixtureService,
   ) {}
 
   /**
@@ -70,7 +70,7 @@ export class TeamController {
 
     DbTransactionHelper.execute(async (dbSession?: ClientSession): Promise<void> => {
       await this.fixtureService.removeFixturesByTeamId(teamId, dbSession);
-      
+
       await this.teamService.removeTeam(req.params.teamId, dbSession);
     });
 

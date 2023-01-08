@@ -122,12 +122,12 @@ export class FixtureService {
    * @returns {Promise<void>}
    */
   async removeFixturesByTeamId(teamId: string, dbSession?: ClientSession): Promise<void> {
-    await FixtureModel.deleteMany({
-      $or: [
-        { homeTeamId: teamId },
-        { awayTeamId: teamId }
-      ]
-    }, { session: dbSession });
+    await FixtureModel.deleteMany(
+      {
+        $or: [{ homeTeamId: teamId }, { awayTeamId: teamId }],
+      },
+      { session: dbSession },
+    );
   }
 
   /**
