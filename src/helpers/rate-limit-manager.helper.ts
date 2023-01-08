@@ -8,11 +8,11 @@ export class RateLimitManager {
   static REDIS_RATE_LIMIT_LIB_PREFIX = "ratelimit:";
 
   /**
-   * @name getAppKey
+   * @method getAppKey
    * @static
-   * @param userId
-   * @param rateLimitType
-   * @returns
+   * @param {string} userId
+   * @param {ApiRateLimiterType} rateLimitType
+   * @returns {string}
    */
   static getAppKey(userId: string, rateLimitType: ApiRateLimiterType): string {
     if (!userId) {
@@ -22,30 +22,28 @@ export class RateLimitManager {
   }
 
   /**
-   * @name getCacheKey
+   * @method getCacheKey
    * @static
-   * @param userId
-   * @param rateLimitType
-   * @returns
+   * @param {string} userId
+   * @param {ApiRateLimiterType} rateLimitType
+   * @returns {string}
    */
   static getCacheKey(userId: string, rateLimitType: ApiRateLimiterType): string {
     return RateLimitManager.REDIS_RATE_LIMIT_LIB_PREFIX + this.getAppKey(userId, rateLimitType);
   }
 
   /**
-   * @name reset
+   * @method reset
    * @static
-   * @memberof RateLimitManager
-   * @param userId
-   * @param rateLimitType
+   * @param {string} userId
+   * @param {ApiRateLimiterType} rateLimitType
    */
-  static async reset(userId: string, rateLimitType: ApiRateLimiterType) {
+  static async reset(userId: string, rateLimitType: ApiRateLimiterType): Promise<void> {
     const redisClient = RedisConnector.getClient();
     if (!redisClient) {
       throw new Error();
     }
 
-    const REDIS_LIB_KEY = this.getCacheKey(userId, rateLimitType);
-    await redisClient.del(REDIS_LIB_KEY);
+    await redisClient.del(this.getCacheKey(userId, rateLimitType));
   }
 }

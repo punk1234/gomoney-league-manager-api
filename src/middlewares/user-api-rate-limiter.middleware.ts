@@ -22,7 +22,6 @@ export const userRateLimiter = (rateLimiterType: ApiRateLimiterType) => {
         redis: RedisConnector.getClient(),
 
         // NOTE: USE `userId` WHEN MORE FUNCTIONALITIES ARE SUPPORTED
-        // key: (req: Request) => getRedisKey(req.params.userId),
         key: (req: Request) => getRedisKey(req.body.email.toLowerCase()),
         ...RATE_LIMIT_CONFIG,
       };
