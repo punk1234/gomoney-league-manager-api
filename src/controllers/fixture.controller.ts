@@ -2,7 +2,7 @@ import { Inject, Service } from "typedi";
 import { Controller } from "../decorators";
 import { Request, Response } from "express";
 import { ResponseHandler } from "../helpers";
-import { CreateFixtureDto } from "../models";
+import { CreateFixtureDto, UpdateFixtureDto } from "../models";
 import { FixtureService } from "../services/fixture.service";
 
 @Service()
@@ -24,6 +24,22 @@ export class FixtureController {
     );
 
     ResponseHandler.created(res, FIXTURE);
+  }
+
+  /**
+   * @method updateFixture
+   * @async
+   * @param {Request} req
+   * @param {Response} res
+   */
+  async updateFixture(req: Request, res: Response) {
+    const FIXTURE = await this.fixtureService.updateFixture(
+      req.params.fixtureId,
+      req.body as UpdateFixtureDto,
+      req.auth?.userId as string,
+    );
+
+    ResponseHandler.ok(res, FIXTURE);
   }
 
   /**
