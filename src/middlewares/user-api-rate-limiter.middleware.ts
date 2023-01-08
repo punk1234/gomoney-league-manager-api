@@ -12,6 +12,7 @@ import { ApiRateLimiterType } from "../constants/api-rate-limiter-type.const";
  */
 export const userRateLimiter = (rateLimiterType: ApiRateLimiterType) => {
   const RATE_LIMIT_CONFIG = config.API_RATE_LIMITING[rateLimiterType];
+  
   const getRedisKey = (userId: string) => {
     return RateLimitManager.getAppKey(userId, rateLimiterType);
   };
@@ -22,6 +23,7 @@ export const userRateLimiter = (rateLimiterType: ApiRateLimiterType) => {
         redis: RedisConnector.getClient(),
 
         // NOTE: USE `userId` WHEN MORE FUNCTIONALITIES ARE SUPPORTED
+        // ALSO, MAYBE SUPPORT `IP-ADDRESS` FOR UNIQUE-KEY
         key: (req: Request) => getRedisKey(req.body.email.toLowerCase()),
         ...RATE_LIMIT_CONFIG,
       };
