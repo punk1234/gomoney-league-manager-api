@@ -1,5 +1,6 @@
 import C from "../constants";
 import { config as getEnvVariables } from "dotenv";
+import apiRateLimitingConfig from "./api-rate-limiting.config";
 
 getEnvVariables();
 
@@ -12,4 +13,6 @@ export default {
   REDIS_URL: env.REDIS_URL || "",
   JWT_TOKEN_SECRET: env.JWT_TOKEN_SECRET || "",
   AUTH_TOKEN_TTL_IN_HOURS: `${env.AUTH_TOKEN_TTL_IN_HOURS || "6"}h`,
+
+  API_RATE_LIMITING: apiRateLimitingConfig,
 };
