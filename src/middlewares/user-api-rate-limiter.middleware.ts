@@ -1,6 +1,6 @@
 import config from "../config";
-import rateLimiter from "redis-rate-limiter";
 import { RateLimitManager } from "../helpers";
+import rateLimiter, { Options } from "redis-rate-limiter";
 import { NextFunction, Request, Response } from "express";
 import RedisConnector from "../database/connectors/redis.connector";
 import { ApiRateLimiterType } from "../constants/api-rate-limiter-type.const";
@@ -19,17 +19,20 @@ export const userRateLimiter = (rateLimiterType: ApiRateLimiterType) => {
 
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const rateLimiterConfig = {
-        redis: RedisConnector.getClient(),
+      const rateLimiterConfig: Options = {
+        redis: RedisConnector.getClient() as any,
 
         // NOTE: USE `userId` WHEN MORE FUNCTIONALITIES ARE SUPPORTED
         // ALSO, MAYBE SUPPORT `IP-ADDRESS` FOR UNIQUE-KEY
         key: (req: Request) => getRedisKey(req.body.email.toLowerCase()),
+
         ...RATE_LIMIT_CONFIG,
       };
 
-      rateLimiter.middleware(rateLimiterConfig as any)(req, res, next);
-    } catch (err) {
+      rateLimiter.middleware(rateLimiterConfig)(req, res, next);
+    } catch (err: any) {
+      console.log(err.name);
+      console.log(typeof err);
       next(err);
     }
   };
