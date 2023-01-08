@@ -6,7 +6,6 @@ import RedisConnector from "../../database/connectors/redis.connector";
  */
 @Service()
 export class CacheManager {
-
   private static DEFAULT_TTL = 1200; // 20 minutes;
 
   /**
@@ -48,5 +47,4 @@ export class CacheManager {
   delete(key: string): Promise<any> {
     return RedisConnector.getClient().del(key);
   }
-
 }

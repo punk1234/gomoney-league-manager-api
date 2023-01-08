@@ -3,8 +3,7 @@ import { CacheManager } from "./managers/cache-manager.service";
 
 @Service()
 export class SessionService {
-
-  private CACHE_NAMESPACE: string = "auth_session_:";
+  private CACHE_NAMESPACE = "auth_session_:";
 
   // eslint-disable-next-line no-useless-constructor
   private cacheManager: CacheManager = new CacheManager();
@@ -39,5 +38,4 @@ export class SessionService {
   invalidateSession(userId: string): Promise<any> {
     return this.cacheManager.delete(`${this.CACHE_NAMESPACE}${userId}`);
   }
-
 }

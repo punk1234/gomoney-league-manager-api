@@ -18,8 +18,8 @@ export const requireAuth = (forAdmin?: boolean) => {
       const authTokenPayload: IAuthTokenPayload = verifyAuthToken(req.headers);
 
       const userAuthSessionId = await sessionService.getUserSession(authTokenPayload.userId);
-      if(authTokenPayload.sessionId !== userAuthSessionId) {
-        throw new UnauthorizedError("Access denied!")
+      if (authTokenPayload.sessionId !== userAuthSessionId) {
+        throw new UnauthorizedError("Access denied!");
       }
 
       if (forAdmin === undefined || authTokenPayload.isAdmin === authTokenPayload.isAdmin) {

@@ -15,7 +15,7 @@ export class AuthService {
   // eslint-disable-next-line no-useless-constructor
   constructor(
     @Inject() private readonly userService: UserService,
-    @Inject() private readonly sessionService: SessionService
+    @Inject() private readonly sessionService: SessionService,
   ) {}
 
   /**
@@ -48,7 +48,10 @@ export class AuthService {
     RateLimitManager.reset(USER.email, C.ApiRateLimiterType.AUTH_LOGIN).catch();
     await this.sessionService.registerSession(USER._id.toString(), AUTH_TOKEN_PAYLOAD.sessionId);
 
-    Logger.info(`User <${USER._id.toString()} logged in successfully. Session=${AUTH_TOKEN_PAYLOAD.sessionId}`);
+    Logger.info(
+      `User <${USER._id.toString()}> logged in successfully.` +
+        `Session=${AUTH_TOKEN_PAYLOAD.sessionId}`,
+    );
 
     return {
       user: USER,
@@ -82,7 +85,7 @@ export class AuthService {
     return {
       userId: user._id,
       isAdmin: user.isAdmin,
-      sessionId: crypto.randomUUID().replace(/-/g, "") + crypto.randomBytes(4).toString("hex")
+      sessionId: crypto.randomUUID().replace(/-/g, "") + crypto.randomBytes(4).toString("hex"),
     };
   }
 }
