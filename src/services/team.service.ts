@@ -4,6 +4,7 @@ import { ITeam } from "../database/types/team.type";
 import TeamModel from "../database/models/team.model";
 import { CreateTeamDto, UpdateTeamDto } from "../models";
 import { BadRequestError, ConflictError, NotFoundError, ServerError } from "../exceptions";
+import { ClientSession } from "mongoose";
 
 @Service()
 export class TeamService {
@@ -83,6 +84,21 @@ export class TeamService {
    */
   async getTeam(teamId: string): Promise<ITeam> {
     return this.checkThatTeamExist(teamId);
+  }
+
+  /**
+   * @method removeTeam
+   * @async
+   * @param {string} teamId
+   * @param {ClientSession} dbSession
+   * @returns {Promise<void>}
+   */
+  async removeTeam(teamId: string, dbSession?: ClientSession): Promise<void> {
+    const DELETION_RESULT = await TeamModel.deleteOne({ _id: teamId }, { session: dbSession });
+
+    if (!DELETION_RESULT.deletedCount) {
+      throw new NotFoundError("Team not found!");
+    }
   }
 
   /**

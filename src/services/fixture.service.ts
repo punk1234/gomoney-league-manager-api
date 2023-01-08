@@ -1,9 +1,10 @@
 import C from "../constants";
 import { Inject, Service } from "typedi";
-import { CreateFixtureDto, UpdateFixtureDto } from "../models";
+import { ClientSession } from "mongoose";
 import { TeamService } from "./team.service";
 import { IFixture } from "../database/types/fixture.type";
 import FixtureModel from "../database/models/fixture.model";
+import { CreateFixtureDto, UpdateFixtureDto } from "../models";
 import { ConflictError, NotFoundError, ServerError, UnprocessableError } from "../exceptions";
 
 @Service()
@@ -111,6 +112,22 @@ export class FixtureService {
     if (!DELETION_RESULT.deletedCount) {
       throw new NotFoundError("Fixture not found!");
     }
+  }
+
+  /**
+   * @method removeFixturesByTeamId
+   * @async
+   * @param {string} teamId
+   * @param {ClientSession} dbSession
+   * @returns {Promise<void>}
+   */
+  async removeFixturesByTeamId(teamId: string, dbSession?: ClientSession): Promise<void> {
+    await FixtureModel.deleteMany({
+      $or: [
+        { homeTeamId: teamId },
+        { awayTeamId: teamId }
+      ]
+    }, { session: dbSession });
   }
 
   /**

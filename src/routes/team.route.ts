@@ -10,5 +10,6 @@ router.post("/", requireAuth(true), controller.createTeam);
 
 router.get("/:teamId", requireAuth(true), controller.getTeam);
 router.patch("/:teamId", requireAuth(true), controller.updateTeam);
+router.delete("/:teamId", requireAuth(true), controller.deleteTeam);
 
 export default router;
