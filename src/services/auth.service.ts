@@ -1,3 +1,4 @@
+import crypto from "crypto";
 import C from "../constants";
 import { Inject, Service } from "typedi";
 import { UserService } from "./user.service";
@@ -5,13 +6,17 @@ import { IUser } from "../database/types/user.type";
 import { LoginDto, LoginResponse, RegisterUserDto } from "../models";
 import { UnauthenticatedError } from "../exceptions";
 import { IAuthTokenPayload } from "../interfaces";
-import { JwtHelper } from "../helpers";
+import { JwtHelper, Logger, RateLimitManager } from "../helpers";
 import config from "../config";
+import { SessionService } from "./session.service";
 
 @Service()
 export class AuthService {
   // eslint-disable-next-line no-useless-constructor
-  constructor(@Inject() private readonly userService: UserService) {}
+  constructor(
+    @Inject() private readonly userService: UserService,
+    @Inject() private readonly sessionService: SessionService,
+  ) {}
 
   /**
    * @method register
@@ -40,6 +45,13 @@ export class AuthService {
     const AUTH_TOKEN = JwtHelper.generateToken(AUTH_TOKEN_PAYLOAD, config.AUTH_TOKEN_TTL_IN_HOURS);
 
     // TODO: HANDLE SESSION MANAGEMENT USING CACHING MECHANISM
+    RateLimitManager.reset(USER.email, C.ApiRateLimiterType.AUTH_LOGIN).catch();
+    await this.sessionService.registerSession(USER._id.toString(), AUTH_TOKEN_PAYLOAD.sessionId);
+
+    Logger.info(
+      `User <${USER._id.toString()}> logged in successfully.` +
+        `Session=${AUTH_TOKEN_PAYLOAD.sessionId}`,
+    );
 
     return {
       user: USER,
@@ -50,8 +62,7 @@ export class AuthService {
   /**
    * @method checkThatUserExistByEmailForLogin
    * @async
-   * @param {string} identifierKey
-   * @param {string} value
+   * @param {string} email
    * @returns {Promise<IUser>}
    */
   private async checkThatUserExistByEmailForLogin(email: string): Promise<IUser> {
@@ -74,6 +85,7 @@ export class AuthService {
     return {
       userId: user._id,
       isAdmin: user.isAdmin,
+      sessionId: crypto.randomUUID().replace(/-/g, "") + crypto.randomBytes(4).toString("hex"),
     };
   }
 }
