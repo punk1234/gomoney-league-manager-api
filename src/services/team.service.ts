@@ -107,7 +107,7 @@ export class TeamService {
    * @param {string} teamId
    * @returns {Promise<ITeam>}
    */
-  private async checkThatTeamExist(teamId: string): Promise<ITeam> {
+  async checkThatTeamExist(teamId: string): Promise<ITeam> {
     const TEAM = await TeamModel.findById(teamId);
 
     if (TEAM) {

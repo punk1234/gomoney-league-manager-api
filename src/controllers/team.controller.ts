@@ -1,11 +1,11 @@
 import { Inject, Service } from "typedi";
 import { Controller } from "../decorators";
 import { Request, Response } from "express";
-import { DbTransactionHelper, ResponseHandler } from "../helpers";
 import { CreateTeamDto, UpdateTeamDto } from "../models";
 import { TeamService } from "../services/team.service";
 import { ClientSession } from "mongoose";
 import { FixtureService } from "../services/fixture.service";
+import { DbTransactionHelper, ResponseHandler } from "../helpers";
 
 @Service()
 @Controller()
@@ -67,6 +67,8 @@ export class TeamController {
    */
   async deleteTeam(req: Request, res: Response) {
     const { teamId } = req.params;
+
+    await this.teamService.checkThatTeamExist(teamId);
 
     DbTransactionHelper.execute(async (dbSession?: ClientSession): Promise<void> => {
       await this.fixtureService.removeFixturesByTeamId(teamId, dbSession);
