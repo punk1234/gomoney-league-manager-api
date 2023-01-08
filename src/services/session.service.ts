@@ -1,4 +1,4 @@
-import { Inject, Service } from "typedi";
+import { Service } from "typedi";
 import { CacheManager } from "./managers/cache-manager.service";
 
 @Service()

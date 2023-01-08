@@ -12,7 +12,7 @@ export class AuthController {
   // eslint-disable-next-line no-useless-constructor
   constructor(
     @Inject() private authService: AuthService,
-    @Inject() private sessionService: SessionService
+    @Inject() private sessionService: SessionService,
   ) {}
 
   /**
