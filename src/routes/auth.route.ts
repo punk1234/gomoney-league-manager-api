@@ -10,7 +10,6 @@ const controller = Container.get(AuthController);
 router.post("/register", controller.register);
 
 router.post("/login", userRateLimiter(C.ApiRateLimiterType.AUTH_LOGIN), controller.login);
-
 router.post("/logout", requireAuth(), controller.logout);
 
 export default router;
