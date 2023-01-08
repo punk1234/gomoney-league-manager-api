@@ -1,6 +1,6 @@
 ## GOMONEY BACK-END ASSESSMENT
 ```
-Football League Manager
+Football League Manager to manage Teams & Fixtures.
 ```
 
 ## PROBLEM STATEMENT
@@ -13,6 +13,8 @@ N/A
 - Typescript (Programming language)
 - MongoDB (NoSQL database)
 - Redis (Caching)
+- Docker
+- Postman
 
 ## ASSUMPTIONS
 - N/A
