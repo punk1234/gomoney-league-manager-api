@@ -11,23 +11,16 @@
  * https://github.com/swagger-api/swagger-codegen.git
  * Do not edit the class manually.
  */
-import { User } from './user';
 /**
- * 
+ * Fixture Unique-Link response-object
  * @export
- * @interface LoginResponse
+ * @interface FixtureUniqueLinkResponse
  */
-export interface LoginResponse {
+export interface FixtureUniqueLinkResponse {
     /**
-     * 
-     * @type {User}
-     * @memberof LoginResponse
-     */
-    user: User;
-    /**
-     * User authentication token (JWT)
+     * Fixture unique link
      * @type {string}
-     * @memberof LoginResponse
+     * @memberof FixtureUniqueLinkResponse
      */
-    token: string;
+    link: string;
 }

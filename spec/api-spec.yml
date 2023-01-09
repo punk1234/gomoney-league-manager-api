@@ -911,7 +911,7 @@ components:
         type: "string"
         format: "date"
       required: false
-      description: "Date to filter records in query"
+      description: "Start date to filter records in query"
 
     pageQuery:
       in: "query"
