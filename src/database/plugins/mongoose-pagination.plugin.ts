@@ -38,7 +38,10 @@ export type IPaginatedModel<T> = Model<T, IPaginationQueryHelper<T>>;
  * @param {object} [config] Plugin configuration
  * @param {number} [config.defaultLimit = 10] pagination default limit
  */
-export const paginationPlugin = (schema: any, config: { name?: string; defaultLimit?: number } = {}) => {
+export const paginationPlugin = (
+  schema: any,
+  config: { name?: string; defaultLimit?: number } = {},
+) => {
   /**
    * @method paginate
    * @param {IPaginationOption} options
@@ -46,7 +49,9 @@ export const paginationPlugin = (schema: any, config: { name?: string; defaultLi
    * @param {number} [options.limit = 10] Number of items to return per page
    * @return {Promise<IPaginatedData>} Paginated data
    */
-  schema.query.paginate = async function paginate(options: IPaginationOption): Promise<IPaginatedData> {
+  schema.query.paginate = async function paginate(
+    options: IPaginationOption,
+  ): Promise<IPaginatedData> {
     let limit = parseInt(String(options.limit || config.defaultLimit || 10), 10);
     limit = limit < 1 ? 10 : limit;
     const page = Math.max(parseInt(String(options.page), 10), 1);
