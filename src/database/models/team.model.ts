@@ -1,4 +1,5 @@
 import { model, Schema } from "mongoose";
+import { IPaginatedModel, paginationPlugin } from "../plugins/mongoose-pagination.plugin";
 import { ITeam } from "../types/team.type";
 
 const TeamSchema = new Schema(
@@ -37,4 +38,6 @@ const TeamSchema = new Schema(
   },
 );
 
-export default model<ITeam>("teams", TeamSchema);
+TeamSchema.plugin(paginationPlugin);
+
+export default model<ITeam, IPaginatedModel<ITeam>>("teams", TeamSchema);
