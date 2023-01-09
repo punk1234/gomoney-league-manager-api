@@ -123,36 +123,6 @@ export class FixtureService {
     return getPaginationSummary(records, totalItemCount, opts);
   }
 
-  private async getFixturesByStatusRecords(
-    status: FixtureStatus,
-    opts: IPaginationOption,
-  ): Promise<Array<any>> {
-    const LOOKUP_DATA = { from: "teams", foreignField: "_id" };
-
-    return FixtureModel.aggregate([
-      { $match: { status } },
-      { $sort: { commencesAt: 1 } },
-      { $skip: (Number(opts.page) - 1) * Number(opts.limit) },
-      { $limit: Number(opts.limit) },
-
-      { $lookup: { ...LOOKUP_DATA, localField: "homeTeamId", as: "homeTeam" } },
-      { $lookup: { ...LOOKUP_DATA, localField: "awayTeamId", as: "awayTeam" } },
-
-      {
-        $project: {
-          _id: 0,
-          id: "$_id",
-          homeTeam: { $first: "$homeTeam.name" },
-          awayTeam: { $first: "$awayTeam.name" },
-          status: 1,
-          commencesAt: 1,
-          matchResult: 1,
-          createdAt: 1,
-        },
-      },
-    ]);
-  }
-
   /**
    * @method removeFixture
    * @async
@@ -214,5 +184,42 @@ export class FixtureService {
     }
 
     throw new NotFoundError("Fixture not found!");
+  }
+
+  /**
+   * @method getFixturesByStatusRecords
+   * @async
+   * @param status 
+   * @param opts 
+   * @returns 
+   */
+  private async getFixturesByStatusRecords(
+    status: FixtureStatus,
+    opts: IPaginationOption,
+  ): Promise<Array<any>> {
+    const LOOKUP_DATA = { from: "teams", foreignField: "_id" };
+
+    return FixtureModel.aggregate([
+      { $match: { status } },
+      { $sort: { commencesAt: 1 } },
+      { $skip: (Number(opts.page) - 1) * Number(opts.limit) },
+      { $limit: Number(opts.limit) },
+
+      { $lookup: { ...LOOKUP_DATA, localField: "homeTeamId", as: "homeTeam" } },
+      { $lookup: { ...LOOKUP_DATA, localField: "awayTeamId", as: "awayTeam" } },
+
+      {
+        $project: {
+          _id: 0,
+          id: "$_id",
+          homeTeam: { $first: "$homeTeam.name" },
+          awayTeam: { $first: "$awayTeam.name" },
+          status: 1,
+          commencesAt: 1,
+          matchResult: 1,
+          createdAt: 1,
+        },
+      },
+    ]);
   }
 }
