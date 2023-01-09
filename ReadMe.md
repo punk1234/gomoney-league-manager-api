@@ -21,3 +21,8 @@ N/A
 
 ## OPTIMIZATIONS
 - N/A
+
+## IMPROVEMENTS
+- API Versioning
+- Add constraints of maximum number of teams that can be added within a League
+- Logic to switch fixture status to IN_PROGRESS or ONGOING
