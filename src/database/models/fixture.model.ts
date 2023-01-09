@@ -1,6 +1,7 @@
 import { model, Schema, Types } from "mongoose";
 import { FixtureStatus } from "../../models";
 import { IFixture } from "../types/fixture.type";
+import { IPaginatedModel } from "../../interfaces";
 
 const FixtureSchema = new Schema(
   {
@@ -54,4 +55,4 @@ const FixtureSchema = new Schema(
 // INDEX WILL BE HELPFUL WHEN TRYING TO CHECK THAT A FIXTURE EXIST OR NOT
 FixtureSchema.index({ homeTeamId: 1 });
 
-export default model<IFixture>("fixtures", FixtureSchema);
+export default model<IFixture, IPaginatedModel<IFixture>>("fixtures", FixtureSchema);

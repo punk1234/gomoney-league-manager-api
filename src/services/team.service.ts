@@ -1,13 +1,11 @@
 import C from "../constants";
 import { Service } from "typedi";
 import { ClientSession } from "mongoose";
+import { IPaginatedData } from "../interfaces";
 import { ITeam } from "../database/types/team.type";
 import TeamModel from "../database/models/team.model";
 import { CreateTeamDto, UpdateTeamDto } from "../models";
 import { BadRequestError, ConflictError, NotFoundError, ServerError } from "../exceptions";
-
-// TODO: MOVE PAGINATION `interfaces` right folder so that import can be direct from "interfaces"
-import { IPaginatedData } from "../database/plugins/mongoose-pagination.plugin";
 
 @Service()
 export class TeamService {
@@ -100,7 +98,6 @@ export class TeamService {
 
     if (searchValue) {
       const SEARCH_VALUE_FILTER_REGEX = new RegExp(`^${searchValue}`, "i");
-
       filter = {
         $or: [{ name: SEARCH_VALUE_FILTER_REGEX }, { code: SEARCH_VALUE_FILTER_REGEX }],
       };

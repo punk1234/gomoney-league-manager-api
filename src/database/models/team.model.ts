@@ -1,6 +1,7 @@
 import { model, Schema } from "mongoose";
-import { IPaginatedModel, paginationPlugin } from "../plugins/mongoose-pagination.plugin";
 import { ITeam } from "../types/team.type";
+import { IPaginatedModel } from "../../interfaces";
+import { paginationPlugin } from "../plugins/mongoose-pagination.plugin";
 
 const TeamSchema = new Schema(
   {

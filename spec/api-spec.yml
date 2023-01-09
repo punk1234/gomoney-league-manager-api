@@ -428,6 +428,8 @@ paths:
   /fixtures/by-status/{fixtureStatus}:
     parameters:
       - $ref: "#/components/parameters/fixtureStatusParam"
+      - $ref: "#/components/parameters/pageQuery"
+      - $ref: "#/components/parameters/limitQuery"
 
     get:
       summary: "Get Fixtures By Status"

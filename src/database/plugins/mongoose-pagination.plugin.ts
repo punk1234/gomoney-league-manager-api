@@ -1,27 +1,4 @@
-import { Model } from "mongoose";
-
-export type IPaginatedData<T = any> = {
-  name: string;
-  size: number;
-  pageCount: number;
-  limit: number;
-  page: number;
-  previousPage: number | null;
-  nextPage: number | null;
-  totalItems: number;
-  records: T[];
-};
-
-export type IPaginationOption = {
-  page: string | number;
-  limit?: string | number;
-};
-
-export type IPaginationQueryHelper<T> = {
-  paginate(options: IPaginationOption): Promise<IPaginatedData<T>>;
-};
-
-export type IPaginatedModel<T> = Model<T, IPaginationQueryHelper<T>>;
+import { IPaginatedData, IPaginationOption } from "../../interfaces";
 
 /**
  * @description
@@ -54,6 +31,7 @@ export const paginationPlugin = (
   ): Promise<IPaginatedData> {
     let limit = parseInt(String(options.limit || config.defaultLimit || 10), 10);
     limit = limit < 1 ? 10 : limit;
+
     const page = Math.max(parseInt(String(options.page), 10), 1);
 
     const offset = (page - 1) * limit;
@@ -63,6 +41,7 @@ export const paginationPlugin = (
     ]);
 
     const pageCount = Math.ceil(totalItems / limit) || 1;
+
     return {
       name: config.name || "Unknown",
       size: records.length,
