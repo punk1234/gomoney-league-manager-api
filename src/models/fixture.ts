@@ -1,8 +1,8 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
- * GoMoney Basic Football-League Manager Service
- * This service provides endpoints for all `basic football-league manager` related interactions
+ * GoMoney Football-League Manager Service
+ * This service provides endpoints for all `football-league manager` related interactions
  *
  * OpenAPI spec version: 1.0.0
  * Contact: fatai@mail.com
@@ -26,17 +26,17 @@ export interface Fixture {
      */
     id: string;
     /**
-     * ID of Home Team
+     * Home Team name
      * @type {string}
      * @memberof Fixture
      */
-    homeTeamId: string;
+    homeTeam: string;
     /**
-     * ID of Away Team
+     * Away Team nam
      * @type {string}
      * @memberof Fixture
      */
-    awayTeamId: string;
+    awayTeam: string;
     /**
      * Date & Time that match starts
      * @type {Date}

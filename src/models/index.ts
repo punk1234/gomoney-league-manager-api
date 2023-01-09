@@ -4,6 +4,7 @@ export * from "./error-message-dto";
 export * from "./fixture";
 export * from "./fixture-list-response";
 export * from "./fixture-status";
+export * from "./fixture-unique-link-response";
 export * from "./login-dto";
 export * from "./login-response";
 export * from "./match-result";
