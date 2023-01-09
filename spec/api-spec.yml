@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
-  title: "GoMoney Basic Football-League Manager Service"
-  description: "This service provides endpoints for all `basic football-league manager` related interactions"
+  title: "GoMoney Football-League Manager Service"
+  description: "This service provides endpoints for all `football-league manager` related interactions"
   version: 1.0.0
   contact:
     name: "AKEJU FATAI"
@@ -137,6 +137,11 @@ paths:
       description: "Get Teams (Maybe Paginated Records - depends on the size of records)"
       operationId: getTeams
       x-visibility: "public"
+      parameters:
+        - $ref: "#/components/parameters/searchValueQuery"
+        - $ref: "#/components/parameters/pageQuery"
+        - $ref: "#/components/parameters/limitQuery"
+        # - $ref: "#/components/parameters/sortQuery"
       tags:
         - "teams"
       responses:
@@ -277,6 +282,14 @@ paths:
       description: "Get Fixtures (Maybe Paginated Records - depends on the size of records)"
       operationId: getFixtures
       x-visibility: "public"
+      parameters:
+        - $ref: "#/components/parameters/fixtureStatusQuery"
+        - $ref: "#/components/parameters/searchValueQuery"
+        - $ref: "#/components/parameters/startDateQuery"
+        - $ref: "#/components/parameters/endDateQuery"
+        - $ref: "#/components/parameters/pageQuery"
+        - $ref: "#/components/parameters/limitQuery"
+        # - $ref: "#/components/parameters/sortQuery"
       tags:
         - "fixtures"
       responses:
@@ -378,6 +391,92 @@ paths:
           $ref: "#/components/responses/AccessDenied"
         "404":
           $ref: "#/components/responses/NotFound"
+        "default":
+          $ref: "#/components/responses/ServerError"
+
+  /fixtures/{fixtureId}/generate-link:
+    parameters:
+      - $ref: "#/components/parameters/fixtureIdParam"
+
+    post:
+      summary: "Generate Fixture Unique Link"
+      description: "Generate Fixture Unique Link"
+      operationId: generateFixtureUniqueLink
+      x-visibility: "public"
+      tags:
+        - "fixtures"
+      responses:
+        "200":
+          description: "Success"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FixtureUniqueLinkResponse"
+        "400":
+          $ref: "#/components/responses/InvalidRequest"
+        "401":
+          $ref: "#/components/responses/Unauthenticated"
+        "403":
+          $ref: "#/components/responses/AccessDenied"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/ConflictError"
+        "default":
+          $ref: "#/components/responses/ServerError"
+
+  /fixtures/by-status/{fixtureStatus}:
+    parameters:
+      - $ref: "#/components/parameters/fixtureStatusParam"
+
+    get:
+      summary: "Get Fixtures By Status"
+      description: "Get Fixtures By Status"
+      operationId: getFixturesByStatus
+      x-visibility: "public"
+      tags:
+        - "fixtures"
+      responses:
+        "200":
+          description: "Success"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FixtureListResponse"
+        "400":
+          $ref: "#/components/responses/InvalidRequest"
+        "401":
+          $ref: "#/components/responses/Unauthenticated"
+        "403":
+          $ref: "#/components/responses/AccessDenied"
+        "default":
+          $ref: "#/components/responses/ServerError"
+
+  /public/fixtures:
+    get:
+      summary: "Get Fixtures (Public API Endpoint)"
+      description: "Get Fixtures (date defaults to current-date)"
+      operationId: getPublicFixtures
+      x-visibility: "public"
+      security: [ ]
+      parameters:
+        - $ref: "#/components/parameters/fixtureStatusQuery"
+        - $ref: "#/components/parameters/searchValueQuery"
+        - $ref: "#/components/parameters/dateQuery"
+        # - $ref: "#/components/parameters/pageQuery"
+        # - $ref: "#/components/parameters/limitQuery"
+        # - $ref: "#/components/parameters/sortQuery"
+      tags:
+        - "fixtures"
+      responses:
+        "200":
+          description: "Success"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FixtureListResponse"
+        "400":
+          $ref: "#/components/responses/InvalidRequest"
         "default":
           $ref: "#/components/responses/ServerError"
   
@@ -602,8 +701,8 @@ components:
       description: "Fixture object"
       required:
         - "id"
-        - "homeTeamId"
-        - "awayTeamId"
+        - "homeTeam"
+        - "awayTeam"
         - "commencesAt"
         - "status"
       properties:
@@ -611,14 +710,14 @@ components:
           type: "string"
           format: "uuid"
           description: "Fixture unique identifier"
-        homeTeamId:
+        homeTeam:
           type: "string"
           format: "uuid"
-          description: "ID of Home Team"
-        awayTeamId:
+          description: "Home Team name"
+        awayTeam:
           type: "string"
           format: "uuid"
-          description: "ID of Away Team"
+          description: "Away Team nam"
         commencesAt:
           type: "string"
           format: "date-time"
@@ -666,6 +765,16 @@ components:
           type: "integer"
           minimum: 0
           description: "Score of Away Team"
+
+    FixtureUniqueLinkResponse:
+      type: "object"
+      description: "Fixture Unique-Link response-object"
+      required:
+        - "link"
+      properties:
+        link:
+          type: "string"
+          description: "Fixture unique link"
 
     StatusDto:
       description: Status data, check additional message field.
@@ -752,6 +861,57 @@ components:
         format: "object-id"
       required: true
       description: "Fixture identifier in path"
+
+    fixtureStatusParam:
+      in: "path"
+      name: "fixtureStatus"
+      schema:
+        $ref: "#/components/schemas/FixtureStatus"
+      required: true
+      description: "Fixture status in path"
+
+    fixtureStatusQuery:
+      in: "query"
+      name: "fixtureStatus"
+      schema:
+        $ref: "#/components/schemas/FixtureStatus"
+      required: false
+      description: "Fixture status in query"
+
+    searchValueQuery:
+      in: "query"
+      name: "searchValue"
+      schema:
+        type: "string"
+      required: false
+      description: "Search value to filter records in query"
+
+    startDateQuery:
+      in: "query"
+      name: "startDate"
+      schema:
+        type: "string"
+        format: "date"
+      required: false
+      description: "Start date to filter records in query"
+
+    endDateQuery:
+      in: "query"
+      name: "endDate"
+      schema:
+        type: "string"
+        format: "date"
+      required: false
+      description: "End date to filter records in query"
+
+    dateQuery:
+      in: "query"
+      name: "date"
+      schema:
+        type: "string"
+        format: "date"
+      required: false
+      description: "Start date to filter records in query"
 
     pageQuery:
       in: "query"
