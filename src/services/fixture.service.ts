@@ -124,6 +124,16 @@ export class FixtureService {
   }
 
   /**
+   * @method getPublicFixtures
+   * @async
+   * @param {Record<string, any>} filter
+   * @returns {Promise<IFixture>}
+   */
+  async getPublicFixtures(filter: Record<string, any>): Promise<Array<IFixture>> {
+    return this.getPublicFixtureRecords(filter);
+  }
+
+  /**
    * @method removeFixture
    * @async
    * @param {string} fixtureId
@@ -189,9 +199,9 @@ export class FixtureService {
   /**
    * @method getFixturesByStatusRecords
    * @async
-   * @param status 
-   * @param opts 
-   * @returns 
+   * @param {FixtureStatus} status
+   * @param {IPaginationOption} opts
+   * @returns {Promise<Array<any>>}
    */
   private async getFixturesByStatusRecords(
     status: FixtureStatus,
@@ -208,6 +218,60 @@ export class FixtureService {
       { $lookup: { ...LOOKUP_DATA, localField: "homeTeamId", as: "homeTeam" } },
       { $lookup: { ...LOOKUP_DATA, localField: "awayTeamId", as: "awayTeam" } },
 
+      {
+        $project: {
+          _id: 0,
+          id: "$_id",
+          homeTeam: { $first: "$homeTeam.name" },
+          awayTeam: { $first: "$awayTeam.name" },
+          status: 1,
+          commencesAt: 1,
+          matchResult: 1,
+          createdAt: 1,
+        },
+      },
+    ]);
+  }
+
+  /**
+   * @method getPublicFixtureRecords
+   * @async
+   * @param {Record<string, any>} filter
+   * @returns {Promise<Array<any>>}
+   */
+  private async getPublicFixtureRecords(filter: Record<string, any>): Promise<Array<any>> {
+    const { searchValue, fixtureStatus, date = new Date().toISOString().slice(0, 10) } = filter;
+
+    filter = fixtureStatus ? { status: fixtureStatus } : {};
+    filter["commencesAt"] = { "$gte": new Date(`${date}T00:00:00.000Z`), "$lte": new Date(`${date}T23:59:59.999Z`) };
+
+    let teamFilter = [];
+    
+    // TODO: PROBABLY CREATE A METHOD IN TEAM-SERVICE AS THIS LOOKS LIKE A DUPLICATE
+    if (searchValue) {
+      const SEARCH_VALUE_FILTER_REGEX = new RegExp(`^${searchValue}`, "i");
+
+      teamFilter.push({
+        $match: {
+            $or: [
+                { "homeTeam.name": SEARCH_VALUE_FILTER_REGEX },
+                { "homeTeam.code": SEARCH_VALUE_FILTER_REGEX },
+                { "awayTeam.name": SEARCH_VALUE_FILTER_REGEX },
+                { "awayTeam.code": SEARCH_VALUE_FILTER_REGEX }
+            ]
+        }
+      });
+    }
+
+    const LOOKUP_DATA = { from: "teams", foreignField: "_id" };
+
+    return FixtureModel.aggregate([
+      { $match: filter },
+      { $sort: { commencesAt: 1 } },
+
+      { $lookup: { ...LOOKUP_DATA, localField: "homeTeamId", as: "homeTeam" } },
+      { $lookup: { ...LOOKUP_DATA, localField: "awayTeamId", as: "awayTeam" } },
+      ...teamFilter as any,
       {
         $project: {
           _id: 0,

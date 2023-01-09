@@ -3,6 +3,7 @@ import { Application } from "express";
 import rootRouter from "./root.route";
 import authRouter from "./auth.route";
 import teamRouter from "./team.route";
+import publicRouter from "./public.route";
 import fixtureRouter from "./fixture.route";
 import { apiRequestValidator, notFoundHandler } from "../middlewares";
 
@@ -21,6 +22,7 @@ export default class RouteManager {
   static installRoutes(app: Application): void {
     app.use(rootRouter);
     app.use(apiRequestValidator(API_SPEC_PATH));
+    app.use("/public", publicRouter);
     app.use("/auth", authRouter);
     app.use("/teams", teamRouter);
     app.use("/fixtures", fixtureRouter);
