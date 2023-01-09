@@ -4,8 +4,10 @@ import { ClientSession } from "mongoose";
 import { TeamService } from "./team.service";
 import { IFixture } from "../database/types/fixture.type";
 import FixtureModel from "../database/models/fixture.model";
-import { CreateFixtureDto, UpdateFixtureDto } from "../models";
+import { IPaginatedData, IPaginationOption } from "../interfaces";
+import { CreateFixtureDto, FixtureStatus, UpdateFixtureDto } from "../models";
 import { ConflictError, NotFoundError, ServerError, UnprocessableError } from "../exceptions";
+import { getPaginationSummary } from "../helpers";
 
 @Service()
 export class FixtureService {
@@ -98,6 +100,57 @@ export class FixtureService {
    */
   async getFixture(fixtureId: string): Promise<IFixture> {
     return this.checkThatFixtureExist(fixtureId);
+  }
+
+  /**
+   * @method getFixturesByStatus
+   * @async
+   * @param {FixtureStatus} status
+   * @param {IPaginationOption} opts
+   * @returns {Promise<IFixture>}
+   */
+  async getFixturesByStatus(
+    status: FixtureStatus,
+    opts: IPaginationOption,
+  ): Promise<IPaginatedData<IFixture>> {
+    opts.page ||= 1;
+
+    const [records, totalItemCount] = await Promise.all([
+      this.getFixturesByStatusRecords(status, opts),
+      FixtureModel.find({ status }).countDocuments(),
+    ]);
+
+    return getPaginationSummary(records, totalItemCount, opts);
+  }
+
+  private async getFixturesByStatusRecords(
+    status: FixtureStatus,
+    opts: IPaginationOption,
+  ): Promise<Array<any>> {
+    const LOOKUP_DATA = { from: "teams", foreignField: "_id" };
+
+    return FixtureModel.aggregate([
+      { $match: { status } },
+      { $sort: { commencesAt: 1 } },
+      { $skip: (Number(opts.page) - 1) * Number(opts.limit) },
+      { $limit: Number(opts.limit) },
+
+      { $lookup: { ...LOOKUP_DATA, localField: "homeTeamId", as: "homeTeam" } },
+      { $lookup: { ...LOOKUP_DATA, localField: "awayTeamId", as: "awayTeam" } },
+
+      {
+        $project: {
+          _id: 0,
+          id: "$_id",
+          homeTeam: { $first: "$homeTeam.name" },
+          awayTeam: { $first: "$awayTeam.name" },
+          status: 1,
+          commencesAt: 1,
+          matchResult: 1,
+          createdAt: 1,
+        },
+      },
+    ]);
   }
 
   /**
