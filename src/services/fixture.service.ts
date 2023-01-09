@@ -243,23 +243,26 @@ export class FixtureService {
     const { searchValue, fixtureStatus, date = new Date().toISOString().slice(0, 10) } = filter;
 
     filter = fixtureStatus ? { status: fixtureStatus } : {};
-    filter["commencesAt"] = { "$gte": new Date(`${date}T00:00:00.000Z`), "$lte": new Date(`${date}T23:59:59.999Z`) };
+    filter["commencesAt"] = {
+      $gte: new Date(`${date}T00:00:00.000Z`),
+      $lte: new Date(`${date}T23:59:59.999Z`),
+    };
 
-    let teamFilter = [];
-    
+    const teamFilter = [];
+
     // TODO: PROBABLY CREATE A METHOD IN TEAM-SERVICE AS THIS LOOKS LIKE A DUPLICATE
     if (searchValue) {
       const SEARCH_VALUE_FILTER_REGEX = new RegExp(`^${searchValue}`, "i");
 
       teamFilter.push({
         $match: {
-            $or: [
-                { "homeTeam.name": SEARCH_VALUE_FILTER_REGEX },
-                { "homeTeam.code": SEARCH_VALUE_FILTER_REGEX },
-                { "awayTeam.name": SEARCH_VALUE_FILTER_REGEX },
-                { "awayTeam.code": SEARCH_VALUE_FILTER_REGEX }
-            ]
-        }
+          $or: [
+            { "homeTeam.name": SEARCH_VALUE_FILTER_REGEX },
+            { "homeTeam.code": SEARCH_VALUE_FILTER_REGEX },
+            { "awayTeam.name": SEARCH_VALUE_FILTER_REGEX },
+            { "awayTeam.code": SEARCH_VALUE_FILTER_REGEX },
+          ],
+        },
       });
     }
 
@@ -271,7 +274,7 @@ export class FixtureService {
 
       { $lookup: { ...LOOKUP_DATA, localField: "homeTeamId", as: "homeTeam" } },
       { $lookup: { ...LOOKUP_DATA, localField: "awayTeamId", as: "awayTeam" } },
-      ...teamFilter as any,
+      ...(teamFilter as any),
       {
         $project: {
           _id: 0,

@@ -76,9 +76,7 @@ export class FixtureController {
    * @param {Response} res
    */
   async getPublicFixtures(req: Request, res: Response) {
-    const FIXTURES = await this.fixtureService.getPublicFixtures(
-      req.query as any
-    );
+    const FIXTURES = await this.fixtureService.getPublicFixtures(req.query as any);
 
     ResponseHandler.ok(res, FIXTURES);
   }
