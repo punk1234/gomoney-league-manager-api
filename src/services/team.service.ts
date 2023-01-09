@@ -1,10 +1,13 @@
 import C from "../constants";
 import { Service } from "typedi";
+import { ClientSession } from "mongoose";
 import { ITeam } from "../database/types/team.type";
 import TeamModel from "../database/models/team.model";
 import { CreateTeamDto, UpdateTeamDto } from "../models";
 import { BadRequestError, ConflictError, NotFoundError, ServerError } from "../exceptions";
-import { ClientSession } from "mongoose";
+
+// TODO: MOVE PAGINATION `interfaces` right folder so that import can be direct from "interfaces"
+import { IPaginatedData } from "../database/plugins/mongoose-pagination.plugin";
 
 @Service()
 export class TeamService {
@@ -84,6 +87,26 @@ export class TeamService {
    */
   async getTeam(teamId: string): Promise<ITeam> {
     return this.checkThatTeamExist(teamId);
+  }
+
+  /**
+   * @method getTeamList
+   * @async
+   * @param {Record<string, any>} filter
+   * @returns {Promise<IPaginatedData<ITeam>>}
+   */
+  async getTeamList(filter: Record<string, any>): Promise<IPaginatedData<ITeam>> {
+    const { searchValue, page = 1, limit } = filter;
+
+    if (searchValue) {
+      const SEARCH_VALUE_FILTER_REGEX = new RegExp(`^${searchValue}`, "i");
+
+      filter = {
+        $or: [{ name: SEARCH_VALUE_FILTER_REGEX }, { code: SEARCH_VALUE_FILTER_REGEX }],
+      };
+    }
+
+    return TeamModel.find(filter).paginate({ limit, page });
   }
 
   /**

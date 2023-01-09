@@ -1,9 +1,9 @@
+import { ClientSession } from "mongoose";
 import { Inject, Service } from "typedi";
 import { Controller } from "../decorators";
 import { Request, Response } from "express";
 import { CreateTeamDto, UpdateTeamDto } from "../models";
 import { TeamService } from "../services/team.service";
-import { ClientSession } from "mongoose";
 import { FixtureService } from "../services/fixture.service";
 import { DbTransactionHelper, ResponseHandler } from "../helpers";
 
@@ -57,6 +57,18 @@ export class TeamController {
     const TEAM = await this.teamService.getTeam(req.params.teamId);
 
     ResponseHandler.ok(res, TEAM);
+  }
+
+  /**
+   * @method getTeamList
+   * @async
+   * @param {Request} req
+   * @param {Response} res
+   */
+  async getTeamList(req: Request, res: Response) {
+    const TEAMS = await this.teamService.getTeamList(req.query);
+
+    ResponseHandler.ok(res, TEAMS);
   }
 
   /**

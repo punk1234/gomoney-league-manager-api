@@ -6,6 +6,7 @@ import { requireAuth } from "../middlewares";
 const router = express.Router();
 const controller = Container.get(TeamController);
 
+router.get("/", requireAuth(), controller.getTeamList);
 router.post("/", requireAuth(true), controller.createTeam);
 
 router.get("/:teamId", requireAuth(true), controller.getTeam);
