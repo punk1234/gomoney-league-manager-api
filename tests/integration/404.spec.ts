@@ -15,7 +15,10 @@ describe("POST /unknown-route", () => {
   });
 
   it("[404] - Send request to an undefined route", async () => {
-    const res = await request(app).post(`/unknown-route`).send({}).expect(C.HttpStatusCode.NOT_FOUND);
+    const res = await request(app)
+      .post(`/unknown-route`)
+      .send({})
+      .expect(C.HttpStatusCode.NOT_FOUND);
 
     expect(res.body.message).toEqual("Method [POST] not found for route [/unknown-route]");
   });

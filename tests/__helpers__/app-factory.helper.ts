@@ -16,7 +16,7 @@ class AppFactory {
   static async create(): Promise<express.Application> {
     this.app = new TestApp(express(), Number(7002));
     await this.app.initialize();
-    
+
     return this.app.engine;
   }
 

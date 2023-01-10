@@ -5,5 +5,5 @@ process.env.JWT_TOKEN_SECRET = "jwt_token_secret";
 
 module.exports = {
   preset: "ts-jest",
-  testEnvironment: "node"
+  testEnvironment: "node",
 };
