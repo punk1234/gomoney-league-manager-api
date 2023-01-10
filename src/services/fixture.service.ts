@@ -8,6 +8,7 @@ import { IPaginatedData, IPaginationOption } from "../interfaces";
 import { CreateFixtureDto, FixtureStatus, UpdateFixtureDto } from "../models";
 import { ConflictError, NotFoundError, ServerError, UnprocessableError } from "../exceptions";
 import { getPaginationSummary } from "../helpers";
+import { date } from "express-openapi-validator/dist/framework/base.serdes";
 
 @Service()
 export class FixtureService {
@@ -103,6 +104,21 @@ export class FixtureService {
   }
 
   /**
+   * @method getFixtures
+   * @async
+   * @param {Record<string, any>} filter
+   * @returns {Promise<IPaginatedData<IFixture>>}
+   */
+  async getFixtures(filter: Record<string, any>): Promise<IPaginatedData<IFixture>> {
+    let [records] = await this.getFixtureRecords(filter);
+
+    const totalItemCount = records["filterCount" as any][0]?.count || 0;
+    records = records["data" as any];
+
+    return getPaginationSummary(records, totalItemCount, { page: filter.page || 1, limit: filter.limit });
+  }
+
+  /**
    * @method getFixturesByStatus
    * @async
    * @param {FixtureStatus} status
@@ -113,7 +129,7 @@ export class FixtureService {
     status: FixtureStatus,
     opts: IPaginationOption,
   ): Promise<IPaginatedData<IFixture>> {
-    opts.page ||= 1;
+    opts.page ||= 1, opts.page ||= 1;
 
     const [records, totalItemCount] = await Promise.all([
       this.getFixturesByStatusRecords(status, opts),
@@ -127,7 +143,7 @@ export class FixtureService {
    * @method getPublicFixtures
    * @async
    * @param {Record<string, any>} filter
-   * @returns {Promise<IFixture>}
+   * @returns {Promise<Array<IFixture>>}
    */
   async getPublicFixtures(filter: Record<string, any>): Promise<Array<IFixture>> {
     return this.getPublicFixtureRecords(filter);
@@ -275,6 +291,7 @@ export class FixtureService {
       { $lookup: { ...LOOKUP_DATA, localField: "homeTeamId", as: "homeTeam" } },
       { $lookup: { ...LOOKUP_DATA, localField: "awayTeamId", as: "awayTeam" } },
       ...(teamFilter as any),
+
       {
         $project: {
           _id: 0,
@@ -287,6 +304,71 @@ export class FixtureService {
           createdAt: 1,
         },
       },
+    ]);
+  }
+
+  /**
+   * @method getFixtureRecords
+   * @async
+   * @param {Record<string, any>} filter
+   * @returns {Promise<Array<any>>}
+   */
+  private async getFixtureRecords(filter: Record<string, any>): Promise<Array<any>> {
+    let { searchValue, fixtureStatus, page = 1, limit = 10, date } = filter;
+    filter = fixtureStatus ? { status: fixtureStatus } : {};
+
+    date && (date = date.slice(0, 10)) && (filter["commencesAt"] = {
+      $gte: new Date(`${date}T00:00:00.000Z`),
+      $lte: new Date(`${date}T23:59:59.999Z`),
+    });
+
+    const teamFilter = [];
+
+    // TODO: PROBABLY CREATE A METHOD IN TEAM-SERVICE AS THIS LOOKS LIKE A DUPLICATE
+    if (searchValue) {
+      const SEARCH_VALUE_FILTER_REGEX = new RegExp(`^${searchValue}`, "i");
+
+      teamFilter.push({
+        $match: {
+          $or: [
+            { "homeTeam.name": SEARCH_VALUE_FILTER_REGEX },
+            { "homeTeam.code": SEARCH_VALUE_FILTER_REGEX },
+            { "awayTeam.name": SEARCH_VALUE_FILTER_REGEX },
+            { "awayTeam.code": SEARCH_VALUE_FILTER_REGEX },
+          ],
+        },
+      });
+    }
+
+    const LOOKUP_DATA = { from: "teams", foreignField: "_id" };
+
+    return FixtureModel.aggregate([
+      { $match: filter },
+      { $sort: { commencesAt: 1 } },
+      { $lookup: { ...LOOKUP_DATA, localField: "homeTeamId", as: "homeTeam" } },
+      { $lookup: { ...LOOKUP_DATA, localField: "awayTeamId", as: "awayTeam" } },
+      ...(teamFilter as any),
+      {
+        $project: {
+            _id: 0,
+            id: "$_id",
+            homeTeam: { $first: "$homeTeam.name" },
+            awayTeam: { $first: "$awayTeam.name" },
+            status: 1,
+            commencesAt: 1,
+            matchResult: 1,
+            createdAt: 1,
+        },
+      },
+      { "$facet": {
+          "data": [
+            { $skip: (Number(page) - 1) * Number(limit) },
+            { $limit: Number(limit) },
+          ],
+          "filterCount": [
+            { "$count": "count" }
+          ]
+      } }
     ]);
   }
 }
