@@ -50,7 +50,7 @@ export default class App {
    * @async
    * @instance
    */
-  private async setupDependencies(): Promise<void> {
+  protected async setupDependencies(): Promise<void> {
     this.mongoConnector = new MongoDbConnector(mongoose);
     this.redisConnector = new RedisConnector();
 
