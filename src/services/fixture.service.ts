@@ -8,7 +8,6 @@ import { IPaginatedData, IPaginationOption } from "../interfaces";
 import { CreateFixtureDto, FixtureStatus, UpdateFixtureDto } from "../models";
 import { ConflictError, NotFoundError, ServerError, UnprocessableError } from "../exceptions";
 import { getPaginationSummary } from "../helpers";
-import { date } from "express-openapi-validator/dist/framework/base.serdes";
 
 @Service()
 export class FixtureService {
@@ -115,7 +114,10 @@ export class FixtureService {
     const totalItemCount = records["filterCount" as any][0]?.count || 0;
     records = records["data" as any];
 
-    return getPaginationSummary(records, totalItemCount, { page: filter.page || 1, limit: filter.limit });
+    return getPaginationSummary(records, totalItemCount, {
+      page: filter.page || 1,
+      limit: filter.limit,
+    });
   }
 
   /**
@@ -129,7 +131,7 @@ export class FixtureService {
     status: FixtureStatus,
     opts: IPaginationOption,
   ): Promise<IPaginatedData<IFixture>> {
-    opts.page ||= 1, opts.page ||= 1;
+    (opts.page ||= 1), (opts.page ||= 1);
 
     const [records, totalItemCount] = await Promise.all([
       this.getFixturesByStatusRecords(status, opts),
@@ -314,13 +316,16 @@ export class FixtureService {
    * @returns {Promise<Array<any>>}
    */
   private async getFixtureRecords(filter: Record<string, any>): Promise<Array<any>> {
-    let { searchValue, fixtureStatus, page = 1, limit = 10, date } = filter;
+    const { searchValue, fixtureStatus, page = 1, limit = 10, date } = filter;
     filter = fixtureStatus ? { status: fixtureStatus } : {};
+    let dateString;
 
-    date && (date = date.slice(0, 10)) && (filter["commencesAt"] = {
-      $gte: new Date(`${date}T00:00:00.000Z`),
-      $lte: new Date(`${date}T23:59:59.999Z`),
-    });
+    if (date && (dateString = date.slice(0, 10))) {
+      filter["commencesAt"] = {
+        $gte: new Date(`${dateString}T00:00:00.000Z`),
+        $lte: new Date(`${dateString}T23:59:59.999Z`),
+      };
+    }
 
     const teamFilter = [];
 
@@ -348,27 +353,26 @@ export class FixtureService {
       { $lookup: { ...LOOKUP_DATA, localField: "homeTeamId", as: "homeTeam" } },
       { $lookup: { ...LOOKUP_DATA, localField: "awayTeamId", as: "awayTeam" } },
       ...(teamFilter as any),
+
       {
         $project: {
-            _id: 0,
-            id: "$_id",
-            homeTeam: { $first: "$homeTeam.name" },
-            awayTeam: { $first: "$awayTeam.name" },
-            status: 1,
-            commencesAt: 1,
-            matchResult: 1,
-            createdAt: 1,
+          _id: 0,
+          id: "$_id",
+          homeTeam: { $first: "$homeTeam.name" },
+          awayTeam: { $first: "$awayTeam.name" },
+          status: 1,
+          commencesAt: 1,
+          matchResult: 1,
+          createdAt: 1,
         },
       },
-      { "$facet": {
-          "data": [
-            { $skip: (Number(page) - 1) * Number(limit) },
-            { $limit: Number(limit) },
-          ],
-          "filterCount": [
-            { "$count": "count" }
-          ]
-      } }
+
+      {
+        $facet: {
+          data: [{ $skip: (Number(page) - 1) * Number(limit) }, { $limit: Number(limit) }],
+          filterCount: [{ $count: "count" }],
+        },
+      },
     ]);
   }
 }
