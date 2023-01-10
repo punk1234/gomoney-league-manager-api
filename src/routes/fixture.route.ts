@@ -6,6 +6,7 @@ import { FixtureController } from "../controllers/fixture.controller";
 const router = express.Router();
 const controller = Container.get(FixtureController);
 
+router.get("/", requireAuth(true), controller.getFixtures);
 router.post("/", requireAuth(true), controller.createFixture);
 
 router.get("/by-status/:fixtureStatus", requireAuth(false), controller.getFixturesByStatus);
