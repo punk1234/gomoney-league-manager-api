@@ -31,8 +31,6 @@ export const userRateLimiter = (rateLimiterType: ApiRateLimiterType) => {
 
       rateLimiter.middleware(rateLimiterConfig)(req, res, next);
     } catch (err: any) {
-      console.log(err.name);
-      console.log(typeof err);
       next(err);
     }
   };

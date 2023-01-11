@@ -23,7 +23,7 @@ export class SessionService {
    * @method getUserSession
    * @instance
    * @param {string} userId
-   * @return {Promise<any>}
+   * @return {Promise<string>}
    */
   getUserSession(userId: string): Promise<string> {
     return this.cacheManager.get(`${this.CACHE_NAMESPACE}${userId}`);

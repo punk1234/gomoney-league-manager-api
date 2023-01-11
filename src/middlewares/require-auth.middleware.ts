@@ -1,9 +1,10 @@
+import C from "../constants";
+import Container from "typedi";
 import { verifyAuthToken } from "../helpers";
 import { IAuthTokenPayload } from "../interfaces";
-import { UnauthorizedError } from "../exceptions";
 import { NextFunction, Request, Response } from "express";
-import Container from "typedi";
 import { SessionService } from "../services/session.service";
+import { UnauthenticatedError, UnauthorizedError } from "../exceptions";
 
 const sessionService = Container.get(SessionService);
 
@@ -19,7 +20,7 @@ export const requireAuth = (forAdmin?: boolean) => {
 
       const userAuthSessionId = await sessionService.getUserSession(authTokenPayload.userId);
       if (authTokenPayload.sessionId !== userAuthSessionId) {
-        throw new UnauthorizedError("Access denied!");
+        throw new UnauthenticatedError(C.ResponseMessage.ERR_UNAUTHENTICATED);
       }
 
       if (forAdmin === undefined || authTokenPayload.isAdmin === authTokenPayload.isAdmin) {
@@ -27,7 +28,7 @@ export const requireAuth = (forAdmin?: boolean) => {
         return next();
       }
 
-      next(new UnauthorizedError("Access denied!"));
+      next(new UnauthorizedError(C.ResponseMessage.ERR_UNAUTHORIZED));
     } catch (err) {
       next(err);
     }
