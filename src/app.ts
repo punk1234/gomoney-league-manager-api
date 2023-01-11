@@ -16,6 +16,7 @@ import { Logger, LoggerStream } from "./helpers";
 import { IAppOptions, IDatabaseConnector } from "./interfaces";
 import RedisConnector from "./database/connectors/redis.connector";
 import MongoDbConnector from "./database/connectors/mongodb.connector";
+import { runDbSeeders } from "./database/seeders";
 
 /**
  * @class App
@@ -59,7 +60,7 @@ export default class App {
       this.redisConnector.connect(config.REDIS_URL),
     ]);
 
-    // TODO: SEED DATABASE
+    await runDbSeeders();
   }
 
   /**
