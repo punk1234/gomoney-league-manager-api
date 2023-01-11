@@ -5,7 +5,6 @@ import { Service } from "typedi";
  */
 @Service()
 export class CacheManager {
-
   data: Record<string, any> = {};
 
   /**
@@ -15,7 +14,7 @@ export class CacheManager {
    * @param {string} value
    */
   set(key: string, value: string) {
-    return this.data[key] = value;
+    return (this.data[key] = value);
   }
 
   /**
@@ -34,8 +33,7 @@ export class CacheManager {
    * @param {string} key
    */
   delete(key: string): Promise<any> {
-    return new Promise((resolve, _reject) => {
-
+    return new Promise((resolve: any) => {
       this.data[key] = undefined;
       resolve(true);
     });
