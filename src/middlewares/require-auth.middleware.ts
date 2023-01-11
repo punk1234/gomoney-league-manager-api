@@ -23,7 +23,7 @@ export const requireAuth = (forAdmin?: boolean) => {
         throw new UnauthenticatedError(C.ResponseMessage.ERR_UNAUTHENTICATED);
       }
 
-      if (forAdmin === undefined || authTokenPayload.isAdmin === authTokenPayload.isAdmin) {
+      if (forAdmin === undefined || authTokenPayload.isAdmin === forAdmin) {
         req.auth = authTokenPayload;
         return next();
       }

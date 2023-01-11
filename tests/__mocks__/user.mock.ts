@@ -6,6 +6,14 @@ export class UserMock {
     return {
       email: "valid-email@email.com",
       password: "abcd#1234",
+      isAdmin: false,
+    };
+  }
+
+  static getValidAdminToCreate() {
+    return {
+      email: "admin-email@email.com",
+      password: "abcd#1234",
       isAdmin: true,
     };
   }
@@ -14,6 +22,13 @@ export class UserMock {
     return {
       ...this.getValidUserToCreate(),
       isAdmin: undefined,
+    };
+  }
+
+  static getValidAdminDataToLogin() {
+    return {
+        ...this.getValidAdminToCreate(),
+        isAdmin: undefined,
     };
   }
 
