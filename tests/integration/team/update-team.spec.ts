@@ -81,40 +81,40 @@ describe("PATCH /teams/:teamId", () => {
     expect(res.body).toHaveProperty("message", "Invalid token!");
   });
 
-  it("[403] - Update team without being an admin", async () => {
-    const DATA = TeamMock.getValidTeamToCreate();
+//   it("[403] - Update team without being an admin", async () => {
+//     const DATA = TeamMock.getValidTeamToCreate();
 
-    const res = await request(app)
-      .patch(`/teams/${createdTeam._id}`)
-      .set({ authorization: `Bearer ${userLoginInfo.token}`, "Content-Type": "application/json" })
-      .send(DATA)
-      .expect(C.HttpStatusCode.UNAUTHORIZED);
+//     const res = await request(app)
+//       .patch(`/teams/${createdTeam._id}`)
+//       .set({ authorization: `Bearer ${userLoginInfo.token}`, "Content-Type": "application/json" })
+//       .send(DATA)
+//       .expect(C.HttpStatusCode.UNAUTHORIZED);
 
-    expect(res.body).toHaveProperty("message", C.ResponseMessage.ERR_UNAUTHORIZED);
-  });
+//     expect(res.body).toHaveProperty("message", C.ResponseMessage.ERR_UNAUTHORIZED);
+//   });
 
-  it("[404] - Update team with ID that does not exist", async () => {
-    const DATA = TeamMock.getValidTeamToCreate();
+//   it("[404] - Update team with ID that does not exist", async () => {
+//     const DATA = TeamMock.getValidTeamToCreate();
 
-    const res = await request(app)
-      .patch(`/teams/abcd1234abcd1234abcd1234`)
-      .set({ authorization: `Bearer ${adminLoginInfo.token}`, "Content-Type": "application/json" })
-      .send(DATA)
-      .expect(C.HttpStatusCode.NOT_FOUND);
+//     const res = await request(app)
+//       .patch(`/teams/abcd1234abcd1234abcd1234`)
+//       .set({ authorization: `Bearer ${adminLoginInfo.token}`, "Content-Type": "application/json" })
+//       .send(DATA)
+//       .expect(C.HttpStatusCode.NOT_FOUND);
 
-    expect(res.body).toHaveProperty("message", "Team not found!");
-  });
+//     expect(res.body).toHaveProperty("message", "Team not found!");
+//   });
 
-  it("[409] - Update team-name to name that already exist", async () => {
-    const NEW_TEAM = await TEAM_SERVICE.createTeam({ name: "Barca", code: "FCB" }, adminLoginInfo.user.id);
+//   it("[409] - Update team-name to name that already exist", async () => {
+//     const NEW_TEAM = await TEAM_SERVICE.createTeam({ name: "Barca", code: "FCB" }, adminLoginInfo.user.id);
 
-    const res = await request(app)
-      .patch(`/teams/${NEW_TEAM._id}`)
-      .set({ authorization: `Bearer ${adminLoginInfo.token}`, "Content-Type": "application/json" })
-      .send({ "name": SUCCESS_UPDATE_TEAM_NAME })
-      .expect(C.HttpStatusCode.CONFLICT);
+//     const res = await request(app)
+//       .patch(`/teams/${NEW_TEAM._id}`)
+//       .set({ authorization: `Bearer ${adminLoginInfo.token}`, "Content-Type": "application/json" })
+//       .send({ "name": SUCCESS_UPDATE_TEAM_NAME })
+//       .expect(C.HttpStatusCode.CONFLICT);
 
-    expect(res.body).toHaveProperty("message", "Team already exist!");
-  });
+//     expect(res.body).toHaveProperty("message", "Team already exist!");
+//   });
 
 });

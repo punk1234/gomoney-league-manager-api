@@ -3,19 +3,27 @@ import request from "supertest";
 import { Application } from "express";
 import C from "../../../src/constants";
 import { UserMock } from "../../__mocks__";
-import { LoginResponse } from "../../../src/models";
+import { FixtureStatus, LoginResponse } from "../../../src/models";
 import AppFactory from "../../__helpers__/app-factory.helper";
 import { UserService } from "../../../src/services/user.service";
 import { AuthService } from "../../../src/services/auth.service";
+import { ITeam } from "../../../src/database/types/team.type";
+import { TeamService } from "../../../src/services/team.service";
+import { FixtureMock } from "../../__mocks__/fixture.mock";
 import { TeamMock } from "../../__mocks__/team.mock";
+import { FixtureService } from "../../../src/services/fixture.service";
 
 const USER_SERVICE = Container.get(UserService);
 const AUTH_SERVICE = Container.get(AuthService);
+const TEAM_SERVICE = Container.get(TeamService);
+const FIXTURE_SERVICE = Container.get(FixtureService);
 
 let app: Application;
 let userLoginInfo: LoginResponse, adminLoginInfo: LoginResponse;
+let createdTeams: Array<ITeam>;
+let existingFixture: any, createdFixture: any;
 
-describe("POST /teams", () => {
+describe("GET /fixtures/:fixtureId", () => {
   beforeAll(async () => {
     app = await AppFactory.create();
 
@@ -24,85 +32,66 @@ describe("POST /teams", () => {
 
     await USER_SERVICE.createUser(UserMock.getValidAdminToCreate());
     adminLoginInfo = await AUTH_SERVICE.login({ ...UserMock.getValidAdminDataToLogin() });
+
+    const TEAMS = TeamMock.getTeams();
+    createdTeams = await Promise.all(TEAMS.map((team) => TEAM_SERVICE.createTeam(team, adminLoginInfo.user.id)));
+
+    createdFixture = await FIXTURE_SERVICE.createFixture({
+        homeTeamId: createdTeams[0]._id,
+        awayTeamId: createdTeams[1]._id,
+        commencesAt: new Date(Date.now() + 3_600_000) // NEXT 1HR
+    }, adminLoginInfo.user.id);
   });
 
   afterAll(async () => {
     await AppFactory.destroy();
   });
 
-  it("[201] - Create team with valid data", async () => {
-    const DATA = TeamMock.getValidTeamToCreate();
-
+  it("[200] - Get fixture with valid data", async () => {
     const res = await request(app)
-      .post("/teams")
+      .get(`/fixtures/${createdFixture._id}`)
       .set({ authorization: `Bearer ${adminLoginInfo.token}`, "Content-Type": "application/json" })
-      .send(DATA)
-      .expect(C.HttpStatusCode.CREATED);
+      .expect(C.HttpStatusCode.SUCCESS);
 
     expect(res.body).toHaveProperty("id");
-    expect(res.body).toHaveProperty("name", DATA.name);
-    expect(res.body).toHaveProperty("code", DATA.code);
+    expect(res.body).toHaveProperty("commencesAt");
+    expect(res.body).toHaveProperty("homeTeamId", createdFixture.homeTeamId.toString());
+    expect(res.body).toHaveProperty("awayTeamId", createdFixture.awayTeamId.toString());
+    expect(res.body).toHaveProperty("status", FixtureStatus.PENDING);
   });
 
-  it("[400] - Create team with empty request object", async () => {
+  it("[400] - Get fixture with invalid ID format in request object", async () => {
     const res = await request(app)
-        .post("/teams")
-        .send({})
+        .get("/fixtures/abcd")
         .expect(C.HttpStatusCode.BAD_REQUEST);
 
     expect(res.body).toHaveProperty("message");
-    expect(res.body.data.errors).toHaveLength(2);
-    expect(res.body.data.errors[0].path).toEqual("/body/name");
-    expect(res.body.data.errors[1].path).toEqual("/body/code");
   });
 
-  // TODO: FIX
-//   it("[400] - Create team with invalid fields in request object", async () => {
-//     const res = await request(app)
-//         .post("/teams")
-//         .set({ authorization: `Bearer ${adminLoginInfo.token}`, "Content-Type": "application/json" })
-//         .send(TeamMock.getInvalidTeamToCreate())
-//         .expect(C.HttpStatusCode.BAD_REQUEST);
-
-//     expect(res.body).toHaveProperty("message");
-//     expect(res.body.data.errors).toHaveLength(2);
-//     expect(res.body.data.errors[0].path).toEqual("/body/name");
-//     expect(res.body.data.errors[1].path).toEqual("/body/code");
-//   });
-
-  it("[401] - Create team without auth-token", async () => {
-    const DATA = TeamMock.getValidTeamToCreate();
-
+  it("[401] - Get fixture without auth-token", async () => {
     const res = await request(app)
-      .post("/teams")
-      .send(DATA)
+      .get(`/fixtures/${createdFixture._id}`)
       .expect(C.HttpStatusCode.UNAUTHENTICATED);
 
     expect(res.body).toHaveProperty("message", "Invalid token!");
   });
 
-  it("[403] - Create team without being an admin", async () => {
-    const DATA = TeamMock.getValidTeamToCreate();
-
+  it("[403] - Get fixture without being an admin", async () => {
     const res = await request(app)
-      .post("/teams")
+      .get(`/fixtures/${createdFixture._id}`)
       .set({ authorization: `Bearer ${userLoginInfo.token}`, "Content-Type": "application/json" })
-      .send(DATA)
       .expect(C.HttpStatusCode.UNAUTHORIZED);
 
     expect(res.body).toHaveProperty("message", C.ResponseMessage.ERR_UNAUTHORIZED);
   });
 
-  it("[409] - Create team that already exist", async () => {
-    const DATA = TeamMock.getValidTeamToCreate();
-
+  it("[404] - Get fixture with ID that does not exist", async () => {
     const res = await request(app)
-      .post("/teams")
+      .get("/fixtures/abcd1234abcd1234abcd1234")
       .set({ authorization: `Bearer ${adminLoginInfo.token}`, "Content-Type": "application/json" })
-      .send(DATA)
-      .expect(C.HttpStatusCode.CONFLICT);
+      .expect(C.HttpStatusCode.NOT_FOUND);
 
-    expect(res.body).toHaveProperty("message", "Team code already exist!");
+    expect(res.body).toHaveProperty("message", "Fixture not found!");
   });
 
 });
