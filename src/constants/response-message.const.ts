@@ -24,7 +24,7 @@ export enum ResponseMessage {
   // ERRORS
   ERR_BAD_REQUEST = "Bad Request",
   ERR_UNAUTHENTICATED = "Unauthenticated Error",
-  ERR_UNAUTHORIZED = "Unauthorized Error",
+  ERR_UNAUTHORIZED = "Access denied!",
   ERR_CONFLICT = "Conflict Error",
   ERR_NOT_FOUND = "Not Found Error",
   ERR_UNPROCESSABLE = "Unprocessable Entity Error",

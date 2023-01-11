@@ -11,6 +11,8 @@ export default class RedisTestConnector extends RedisConnector {
    */
   async connect(url: string) {
     console.log("Connection URL:", url);
+
+    RedisConnector.setClient(RedisMock.createClient() as any);
     RedisTestConnector.client = RedisMock.createClient() as any;
   }
 }
