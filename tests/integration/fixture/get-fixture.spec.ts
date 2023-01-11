@@ -9,7 +9,6 @@ import { UserService } from "../../../src/services/user.service";
 import { AuthService } from "../../../src/services/auth.service";
 import { ITeam } from "../../../src/database/types/team.type";
 import { TeamService } from "../../../src/services/team.service";
-import { FixtureMock } from "../../__mocks__/fixture.mock";
 import { TeamMock } from "../../__mocks__/team.mock";
 import { FixtureService } from "../../../src/services/fixture.service";
 
@@ -21,7 +20,7 @@ const FIXTURE_SERVICE = Container.get(FixtureService);
 let app: Application;
 let userLoginInfo: LoginResponse, adminLoginInfo: LoginResponse;
 let createdTeams: Array<ITeam>;
-let existingFixture: any, createdFixture: any;
+let createdFixture: any;
 
 describe("GET /fixtures/:fixtureId", () => {
   beforeAll(async () => {
@@ -34,13 +33,18 @@ describe("GET /fixtures/:fixtureId", () => {
     adminLoginInfo = await AUTH_SERVICE.login({ ...UserMock.getValidAdminDataToLogin() });
 
     const TEAMS = TeamMock.getTeams();
-    createdTeams = await Promise.all(TEAMS.map((team) => TEAM_SERVICE.createTeam(team, adminLoginInfo.user.id)));
+    createdTeams = await Promise.all(
+      TEAMS.map((team: any) => TEAM_SERVICE.createTeam(team, adminLoginInfo.user.id)),
+    );
 
-    createdFixture = await FIXTURE_SERVICE.createFixture({
+    createdFixture = await FIXTURE_SERVICE.createFixture(
+      {
         homeTeamId: createdTeams[0]._id,
         awayTeamId: createdTeams[1]._id,
-        commencesAt: new Date(Date.now() + 3_600_000) // NEXT 1HR
-    }, adminLoginInfo.user.id);
+        commencesAt: new Date(Date.now() + 3_600_000), // NEXT 1HR
+      },
+      adminLoginInfo.user.id,
+    );
   });
 
   afterAll(async () => {
@@ -61,9 +65,7 @@ describe("GET /fixtures/:fixtureId", () => {
   });
 
   it("[400] - Get fixture with invalid ID format in request object", async () => {
-    const res = await request(app)
-        .get("/fixtures/abcd")
-        .expect(C.HttpStatusCode.BAD_REQUEST);
+    const res = await request(app).get("/fixtures/abcd").expect(C.HttpStatusCode.BAD_REQUEST);
 
     expect(res.body).toHaveProperty("message");
   });
@@ -93,5 +95,4 @@ describe("GET /fixtures/:fixtureId", () => {
 
     expect(res.body).toHaveProperty("message", "Fixture not found!");
   });
-
 });

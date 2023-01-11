@@ -18,7 +18,7 @@ const TEAM_SERVICE = Container.get(TeamService);
 let app: Application;
 let userLoginInfo: LoginResponse, adminLoginInfo: LoginResponse;
 let createdTeam: ITeam;
-const SUCCESS_UPDATE_TEAM_NAME = "Arsenal"
+const SUCCESS_UPDATE_TEAM_NAME = "Arsenal";
 
 describe("PATCH /teams/:teamId", () => {
   beforeAll(async () => {
@@ -30,7 +30,10 @@ describe("PATCH /teams/:teamId", () => {
     await USER_SERVICE.createUser(UserMock.getValidAdminToCreate());
     adminLoginInfo = await AUTH_SERVICE.login({ ...UserMock.getValidAdminDataToLogin() });
 
-    createdTeam = await TEAM_SERVICE.createTeam(TeamMock.getValidTeamToCreate(), adminLoginInfo.user.id);
+    createdTeam = await TEAM_SERVICE.createTeam(
+      TeamMock.getValidTeamToCreate(),
+      adminLoginInfo.user.id,
+    );
   });
 
   afterAll(async () => {
@@ -41,7 +44,7 @@ describe("PATCH /teams/:teamId", () => {
     const DATA = {
       name: SUCCESS_UPDATE_TEAM_NAME,
       code: "ARS",
-      logoUrl: "https://arsenal.com/logo.svg"
+      logoUrl: "https://arsenal.com/logo.svg",
     };
 
     const res = await request(app)
@@ -57,18 +60,18 @@ describe("PATCH /teams/:teamId", () => {
   });
 
   // TODO: FIX
-//   it("[400] - Create team with invalid fields in request object", async () => {
-//     const res = await request(app)
-//         .patch(`/teams/${createdTeam._id}`)
-//         .set({ authorization: `Bearer ${adminLoginInfo.token}`, "Content-Type": "application/json" })
-//         .send(TeamMock.getInvalidTeamToCreate())
-//         .expect(C.HttpStatusCode.BAD_REQUEST);
+  //   it("[400] - Create team with invalid fields in request object", async () => {
+  //     const res = await request(app)
+  //         .patch(`/teams/${createdTeam._id}`)
+  //         .set({ authorization: `Bearer ${adminLoginInfo.token}`, "Content-Type": "application/json" })
+  //         .send(TeamMock.getInvalidTeamToCreate())
+  //         .expect(C.HttpStatusCode.BAD_REQUEST);
 
-//     expect(res.body).toHaveProperty("message");
-//     expect(res.body.data.errors).toHaveLength(2);
-//     expect(res.body.data.errors[0].path).toEqual("/body/name");
-//     expect(res.body.data.errors[1].path).toEqual("/body/code");
-//   });
+  //     expect(res.body).toHaveProperty("message");
+  //     expect(res.body.data.errors).toHaveLength(2);
+  //     expect(res.body.data.errors[0].path).toEqual("/body/name");
+  //     expect(res.body.data.errors[1].path).toEqual("/body/code");
+  //   });
 
   it("[401] - Update team without auth-token", async () => {
     const DATA = TeamMock.getValidTeamToCreate();
@@ -81,40 +84,42 @@ describe("PATCH /teams/:teamId", () => {
     expect(res.body).toHaveProperty("message", "Invalid token!");
   });
 
-//   it("[403] - Update team without being an admin", async () => {
-//     const DATA = TeamMock.getValidTeamToCreate();
+  it("[403] - Update team without being an admin", async () => {
+    const DATA = TeamMock.getValidTeamToCreate();
 
-//     const res = await request(app)
-//       .patch(`/teams/${createdTeam._id}`)
-//       .set({ authorization: `Bearer ${userLoginInfo.token}`, "Content-Type": "application/json" })
-//       .send(DATA)
-//       .expect(C.HttpStatusCode.UNAUTHORIZED);
+    const res = await request(app)
+      .patch(`/teams/${createdTeam._id}`)
+      .set({ authorization: `Bearer ${userLoginInfo.token}`, "Content-Type": "application/json" })
+      .send(DATA)
+      .expect(C.HttpStatusCode.UNAUTHORIZED);
 
-//     expect(res.body).toHaveProperty("message", C.ResponseMessage.ERR_UNAUTHORIZED);
-//   });
+    expect(res.body).toHaveProperty("message", C.ResponseMessage.ERR_UNAUTHORIZED);
+  });
 
-//   it("[404] - Update team with ID that does not exist", async () => {
-//     const DATA = TeamMock.getValidTeamToCreate();
+  it("[404] - Update team with ID that does not exist", async () => {
+    const DATA = TeamMock.getValidTeamToCreate();
 
-//     const res = await request(app)
-//       .patch(`/teams/abcd1234abcd1234abcd1234`)
-//       .set({ authorization: `Bearer ${adminLoginInfo.token}`, "Content-Type": "application/json" })
-//       .send(DATA)
-//       .expect(C.HttpStatusCode.NOT_FOUND);
+    const res = await request(app)
+      .patch(`/teams/abcd1234abcd1234abcd1234`)
+      .set({ authorization: `Bearer ${adminLoginInfo.token}`, "Content-Type": "application/json" })
+      .send(DATA)
+      .expect(C.HttpStatusCode.NOT_FOUND);
 
-//     expect(res.body).toHaveProperty("message", "Team not found!");
-//   });
+    expect(res.body).toHaveProperty("message", "Team not found!");
+  });
 
-//   it("[409] - Update team-name to name that already exist", async () => {
-//     const NEW_TEAM = await TEAM_SERVICE.createTeam({ name: "Barca", code: "FCB" }, adminLoginInfo.user.id);
+  it("[409] - Update team-name to name that already exist", async () => {
+    const NEW_TEAM = await TEAM_SERVICE.createTeam(
+      { name: "Barca", code: "FCB" },
+      adminLoginInfo.user.id,
+    );
 
-//     const res = await request(app)
-//       .patch(`/teams/${NEW_TEAM._id}`)
-//       .set({ authorization: `Bearer ${adminLoginInfo.token}`, "Content-Type": "application/json" })
-//       .send({ "name": SUCCESS_UPDATE_TEAM_NAME })
-//       .expect(C.HttpStatusCode.CONFLICT);
+    const res = await request(app)
+      .patch(`/teams/${NEW_TEAM._id}`)
+      .set({ authorization: `Bearer ${adminLoginInfo.token}`, "Content-Type": "application/json" })
+      .send({ name: SUCCESS_UPDATE_TEAM_NAME })
+      .expect(C.HttpStatusCode.CONFLICT);
 
-//     expect(res.body).toHaveProperty("message", "Team already exist!");
-//   });
-
+    expect(res.body).toHaveProperty("message", "Team already exist!");
+  });
 });

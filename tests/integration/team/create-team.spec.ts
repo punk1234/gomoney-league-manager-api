@@ -45,10 +45,7 @@ describe("POST /teams", () => {
   });
 
   it("[400] - Create team with empty request object", async () => {
-    const res = await request(app)
-        .post("/teams")
-        .send({})
-        .expect(C.HttpStatusCode.BAD_REQUEST);
+    const res = await request(app).post("/teams").send({}).expect(C.HttpStatusCode.BAD_REQUEST);
 
     expect(res.body).toHaveProperty("message");
     expect(res.body.data.errors).toHaveLength(2);
@@ -57,18 +54,18 @@ describe("POST /teams", () => {
   });
 
   // TODO: FIX
-//   it("[400] - Create team with invalid fields in request object", async () => {
-//     const res = await request(app)
-//         .post("/teams")
-//         .set({ authorization: `Bearer ${adminLoginInfo.token}`, "Content-Type": "application/json" })
-//         .send(TeamMock.getInvalidTeamToCreate())
-//         .expect(C.HttpStatusCode.BAD_REQUEST);
+  //   it("[400] - Create team with invalid fields in request object", async () => {
+  //     const res = await request(app)
+  //         .post("/teams")
+  //         .set({ authorization: `Bearer ${adminLoginInfo.token}`, "Content-Type": "application/json" })
+  //         .send(TeamMock.getInvalidTeamToCreate())
+  //         .expect(C.HttpStatusCode.BAD_REQUEST);
 
-//     expect(res.body).toHaveProperty("message");
-//     expect(res.body.data.errors).toHaveLength(2);
-//     expect(res.body.data.errors[0].path).toEqual("/body/name");
-//     expect(res.body.data.errors[1].path).toEqual("/body/code");
-//   });
+  //     expect(res.body).toHaveProperty("message");
+  //     expect(res.body.data.errors).toHaveLength(2);
+  //     expect(res.body.data.errors[0].path).toEqual("/body/name");
+  //     expect(res.body.data.errors[1].path).toEqual("/body/code");
+  //   });
 
   it("[401] - Create team without auth-token", async () => {
     const DATA = TeamMock.getValidTeamToCreate();
@@ -104,5 +101,4 @@ describe("POST /teams", () => {
 
     expect(res.body).toHaveProperty("message", "Team code already exist!");
   });
-
 });

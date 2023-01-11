@@ -18,7 +18,7 @@ const TEAM_SERVICE = Container.get(TeamService);
 const FIXTURE_SERVICE = Container.get(FixtureService);
 
 let app: Application;
-let userLoginInfo: LoginResponse,adminLoginInfo: LoginResponse;
+let userLoginInfo: LoginResponse, adminLoginInfo: LoginResponse;
 let teams: Array<ITeam>;
 let createdFixtures: Array<IFixture>;
 
@@ -33,25 +33,29 @@ describe("GET /fixtures", () => {
     adminLoginInfo = await AUTH_SERVICE.login({ ...UserMock.getValidAdminDataToLogin() });
 
     const TEAMS = [
-        { name: "aBAB", code: "AB1" },
-        { name: "BBAA", code: "BA2" },
-        { name: "BBCC", code: "BC3" },
-        { name: "ABAa", code: "AA4" },
-        { name: "AbAD", code: "DA5" },
+      { name: "aBAB", code: "AB1" },
+      { name: "BBAA", code: "BA2" },
+      { name: "BBCC", code: "BC3" },
+      { name: "ABAa", code: "AA4" },
+      { name: "AbAD", code: "DA5" },
     ];
 
-    teams = await Promise.all(TEAMS.map((team) => TEAM_SERVICE.createTeam(team, adminLoginInfo.user.id)));
+    teams = await Promise.all(
+      TEAMS.map((team: any) => TEAM_SERVICE.createTeam(team, adminLoginInfo.user.id)),
+    );
 
     const FIXTURE_DATE = new Date(Date.now() + 3_600_000); // next 1hr
     const FIXTURES = [
-        { homeTeamId: teams[0]._id, awayTeamId: teams[1]._id , commencesAt: FIXTURE_DATE },
-        { homeTeamId: teams[0]._id, awayTeamId: teams[4]._id , commencesAt: FIXTURE_DATE },
-        { homeTeamId: teams[1]._id, awayTeamId: teams[2]._id , commencesAt: FIXTURE_DATE },
-        { homeTeamId: teams[2]._id, awayTeamId: teams[3]._id , commencesAt: FIXTURE_DATE },
-        { homeTeamId: teams[3]._id, awayTeamId: teams[2]._id , commencesAt: FIXTURE_DATE }
-    ]
+      { homeTeamId: teams[0]._id, awayTeamId: teams[1]._id, commencesAt: FIXTURE_DATE },
+      { homeTeamId: teams[0]._id, awayTeamId: teams[4]._id, commencesAt: FIXTURE_DATE },
+      { homeTeamId: teams[1]._id, awayTeamId: teams[2]._id, commencesAt: FIXTURE_DATE },
+      { homeTeamId: teams[2]._id, awayTeamId: teams[3]._id, commencesAt: FIXTURE_DATE },
+      { homeTeamId: teams[3]._id, awayTeamId: teams[2]._id, commencesAt: FIXTURE_DATE },
+    ];
 
-    createdFixtures = await Promise.all(FIXTURES.map(item => FIXTURE_SERVICE.createFixture(item, adminLoginInfo.user.id)));
+    createdFixtures = await Promise.all(
+      FIXTURES.map((item: any) => FIXTURE_SERVICE.createFixture(item, adminLoginInfo.user.id)),
+    );
   });
 
   afterAll(async () => {
@@ -70,7 +74,7 @@ describe("GET /fixtures", () => {
       createdFixtures[0]._id.toString(),
       createdFixtures[1]._id.toString(),
       createdFixtures[3]._id.toString(),
-      createdFixtures[4]._id.toString()
+      createdFixtures[4]._id.toString(),
     ];
 
     expect(res.body.records).toHaveLength(4);
@@ -96,9 +100,7 @@ describe("GET /fixtures", () => {
   });
 
   it("[401] - Get fixtures with missing token", async () => {
-    const res = await request(app)
-      .get(`/fixtures`)
-      .expect(C.HttpStatusCode.UNAUTHENTICATED);
+    const res = await request(app).get(`/fixtures`).expect(C.HttpStatusCode.UNAUTHENTICATED);
 
     expect(res.body).toHaveProperty("message", "Invalid token!");
   });
@@ -111,5 +113,4 @@ describe("GET /fixtures", () => {
 
     expect(res.body).toHaveProperty("message", C.ResponseMessage.ERR_UNAUTHORIZED);
   });
-
 });

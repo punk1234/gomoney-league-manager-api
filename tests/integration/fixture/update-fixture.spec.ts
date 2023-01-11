@@ -34,13 +34,18 @@ describe("PATCH /fixtures/:fixtureId", () => {
     adminLoginInfo = await AUTH_SERVICE.login({ ...UserMock.getValidAdminDataToLogin() });
 
     const TEAMS = TeamMock.getTeams();
-    createdTeams = await Promise.all(TEAMS.map((team) => TEAM_SERVICE.createTeam(team, adminLoginInfo.user.id)));
+    createdTeams = await Promise.all(
+      TEAMS.map((team: any) => TEAM_SERVICE.createTeam(team, adminLoginInfo.user.id)),
+    );
 
-    createdFixture = await FIXTURE_SERVICE.createFixture({
+    createdFixture = await FIXTURE_SERVICE.createFixture(
+      {
         homeTeamId: createdTeams[0]._id,
         awayTeamId: createdTeams[1]._id,
-        commencesAt: new Date(Date.now() + 3_600_000) // NEXT 1HR
-    }, adminLoginInfo.user.id);
+        commencesAt: new Date(Date.now() + 3_600_000), // NEXT 1HR
+      },
+      adminLoginInfo.user.id,
+    );
   });
 
   afterAll(async () => {
@@ -49,10 +54,10 @@ describe("PATCH /fixtures/:fixtureId", () => {
 
   it("[200] - Update fixture with valid data (switch home-team for away-team)", async () => {
     const DATA = {
-        homeTeamId: createdTeams[1]._id,
-        awayTeamId: createdTeams[0]._id,
-        commencesAt: new Date(Date.now() + 3_600_000), // NEXT 1HR
-        // matchResult: { homeTeamScore: 3, awayTeamScore: 0 }
+      homeTeamId: createdTeams[1]._id,
+      awayTeamId: createdTeams[0]._id,
+      commencesAt: new Date(Date.now() + 3_600_000), // NEXT 1HR
+      // matchResult: { homeTeamScore: 3, awayTeamScore: 0 }
     };
 
     existingFixture = DATA;
@@ -72,19 +77,19 @@ describe("PATCH /fixtures/:fixtureId", () => {
 
   it("[400] - Update fixture with empty request object", async () => {
     const res = await request(app)
-        .patch(`/fixtures/${createdFixture._id}`)
-        .send({})
-        .expect(C.HttpStatusCode.BAD_REQUEST);
+      .patch(`/fixtures/${createdFixture._id}`)
+      .send({})
+      .expect(C.HttpStatusCode.BAD_REQUEST);
 
     expect(res.body).toHaveProperty("message");
   });
 
   it("[400] - Update fixture with invalid fields in request object", async () => {
     const res = await request(app)
-        .patch(`/fixtures/${createdFixture._id}`)
-        .set({ authorization: `Bearer ${adminLoginInfo.token}`, "Content-Type": "application/json" })
-        .send(FixtureMock.getInvalidFixtureToCreate())
-        .expect(C.HttpStatusCode.BAD_REQUEST);
+      .patch(`/fixtures/${createdFixture._id}`)
+      .set({ authorization: `Bearer ${adminLoginInfo.token}`, "Content-Type": "application/json" })
+      .send(FixtureMock.getInvalidFixtureToCreate())
+      .expect(C.HttpStatusCode.BAD_REQUEST);
 
     expect(res.body).toHaveProperty("message");
     expect(res.body.data.errors).toHaveLength(3);
@@ -129,11 +134,14 @@ describe("PATCH /fixtures/:fixtureId", () => {
   });
 
   it("[409] - Update fixture to a fixture that already exist", async () => {
-    const NEW_FIXTURE = await FIXTURE_SERVICE.createFixture({
+    const NEW_FIXTURE = await FIXTURE_SERVICE.createFixture(
+      {
         homeTeamId: createdTeams[1]._id,
         awayTeamId: createdTeams[2]._id,
-        commencesAt: new Date(Date.now() + 3_600_000) // NEXT 1HR
-    }, adminLoginInfo.user.id);
+        commencesAt: new Date(Date.now() + 3_600_000), // NEXT 1HR
+      },
+      adminLoginInfo.user.id,
+    );
 
     const res = await request(app)
       .patch(`/fixtures/${NEW_FIXTURE._id}`)
@@ -143,5 +151,4 @@ describe("PATCH /fixtures/:fixtureId", () => {
 
     expect(res.body).toHaveProperty("message", "Fixture already exist!");
   });
-
 });

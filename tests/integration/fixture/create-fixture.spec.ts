@@ -33,7 +33,9 @@ describe("POST /fixtures", () => {
 
     const TEAMS = TeamMock.getTeams();
 
-    createdTeams = await Promise.all(TEAMS.map((team) => TEAM_SERVICE.createTeam(team, adminLoginInfo.user.id)));
+    createdTeams = await Promise.all(
+      TEAMS.map((team: any) => TEAM_SERVICE.createTeam(team, adminLoginInfo.user.id)),
+    );
   });
 
   afterAll(async () => {
@@ -42,9 +44,9 @@ describe("POST /fixtures", () => {
 
   it("[201] - Create fixture with valid data", async () => {
     const DATA = {
-        homeTeamId: createdTeams[0]._id,
-        awayTeamId: createdTeams[1]._id,
-        commencesAt: new Date(Date.now() + 3_600_000) // NEXT 1HR
+      homeTeamId: createdTeams[0]._id,
+      awayTeamId: createdTeams[1]._id,
+      commencesAt: new Date(Date.now() + 3_600_000), // NEXT 1HR
     };
 
     existingFixture = DATA;
@@ -63,10 +65,7 @@ describe("POST /fixtures", () => {
   });
 
   it("[400] - Create fixture with empty request object", async () => {
-    const res = await request(app)
-        .post("/fixtures")
-        .send({})
-        .expect(C.HttpStatusCode.BAD_REQUEST);
+    const res = await request(app).post("/fixtures").send({}).expect(C.HttpStatusCode.BAD_REQUEST);
 
     expect(res.body).toHaveProperty("message");
     expect(res.body.data.errors).toHaveLength(3);
@@ -77,10 +76,10 @@ describe("POST /fixtures", () => {
 
   it("[400] - Create fixture with invalid fields in request object", async () => {
     const res = await request(app)
-        .post("/fixtures")
-        .set({ authorization: `Bearer ${adminLoginInfo.token}`, "Content-Type": "application/json" })
-        .send(FixtureMock.getInvalidFixtureToCreate())
-        .expect(C.HttpStatusCode.BAD_REQUEST);
+      .post("/fixtures")
+      .set({ authorization: `Bearer ${adminLoginInfo.token}`, "Content-Type": "application/json" })
+      .send(FixtureMock.getInvalidFixtureToCreate())
+      .expect(C.HttpStatusCode.BAD_REQUEST);
 
     expect(res.body).toHaveProperty("message");
     expect(res.body.data.errors).toHaveLength(3);
@@ -121,5 +120,4 @@ describe("POST /fixtures", () => {
 
     expect(res.body).toHaveProperty("message", "Fixture already exist!");
   });
-
 });

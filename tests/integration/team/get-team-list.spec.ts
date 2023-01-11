@@ -8,7 +8,6 @@ import AppFactory from "../../__helpers__/app-factory.helper";
 import { UserService } from "../../../src/services/user.service";
 import { AuthService } from "../../../src/services/auth.service";
 import { TeamService } from "../../../src/services/team.service";
-import { ITeam } from "../../../src/database/types/team.type";
 
 const USER_SERVICE = Container.get(UserService);
 const AUTH_SERVICE = Container.get(AuthService);
@@ -16,7 +15,6 @@ const TEAM_SERVICE = Container.get(TeamService);
 
 let app: Application;
 let adminLoginInfo: LoginResponse;
-let createdTeams: Array<ITeam>;
 
 describe("GET /teams", () => {
   beforeAll(async () => {
@@ -26,14 +24,16 @@ describe("GET /teams", () => {
     adminLoginInfo = await AUTH_SERVICE.login({ ...UserMock.getValidAdminDataToLogin() });
 
     const TEAMS = [
-        { name: "aBAB", code: "AB1" },
-        { name: "BBAA", code: "BA2" },
-        { name: "BBCC", code: "BC3" },
-        { name: "ABAa", code: "AA4" },
-        { name: "AbAD", code: "DA5" },
+      { name: "aBAB", code: "AB1" },
+      { name: "BBAA", code: "BA2" },
+      { name: "BBCC", code: "BC3" },
+      { name: "ABAa", code: "AA4" },
+      { name: "AbAD", code: "DA5" },
     ];
 
-    createdTeams = await Promise.all(TEAMS.map((team) => TEAM_SERVICE.createTeam(team, adminLoginInfo.user.id)));
+    await Promise.all(
+      TEAMS.map((team: any) => TEAM_SERVICE.createTeam(team, adminLoginInfo.user.id)),
+    );
   });
 
   afterAll(async () => {
@@ -58,26 +58,23 @@ describe("GET /teams", () => {
     expect(VALID_TEAM_NAMES.includes(res.body.records[2].name)).toEqual(true);
   });
 
-//   it("[400] - Get team-list with invalid query filter", async () => {
-//     const res = await request(app)
-//     //   .get(`/teams?searchValue=&page=xyz&limit=abc`)
-//       .get(`/teams?searchValue=`)
-//       .set({ authorization: `Bearer ${adminLoginInfo.token}`, "Content-Type": "application/json" })
-//       .expect(C.HttpStatusCode.BAD_REQUEST);
+  it("[400] - Get team-list with invalid query filter", async () => {
+    const res = await request(app)
+      //   .get(`/teams?searchValue=&page=xyz&limit=abc`)
+      .get(`/teams?searchValue=`)
+      .set({ authorization: `Bearer ${adminLoginInfo.token}`, "Content-Type": "application/json" })
+      .expect(C.HttpStatusCode.BAD_REQUEST);
 
-//     expect(res.body).toHaveProperty("message");
-//     expect(res.body.data.errors).toHaveLength(1);
-//     expect(res.body.data.errors[0].path).toEqual("/query/searchValue");
-//     // expect(res.body.data.errors[1].path).toEqual("/query/page");
-//     // expect(res.body.data.errors[2].path).toEqual("/query/limit");
-//   });
+    expect(res.body).toHaveProperty("message");
+    expect(res.body.data.errors).toHaveLength(1);
+    expect(res.body.data.errors[0].path).toEqual("/query/searchValue");
+    // expect(res.body.data.errors[1].path).toEqual("/query/page");
+    // expect(res.body.data.errors[2].path).toEqual("/query/limit");
+  });
 
-//   it("[401] - Get team-list with missing token", async () => {
-//     const res = await request(app)
-//       .get(`/teams`)
-//       .expect(C.HttpStatusCode.UNAUTHENTICATED);
+  it("[401] - Get team-list with missing token", async () => {
+    const res = await request(app).get(`/teams`).expect(C.HttpStatusCode.UNAUTHENTICATED);
 
-//     expect(res.body).toHaveProperty("message", "Invalid token!");
-//   });
-
+    expect(res.body).toHaveProperty("message", "Invalid token!");
+  });
 });
