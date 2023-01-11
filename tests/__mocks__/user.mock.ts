@@ -27,8 +27,8 @@ export class UserMock {
 
   static getValidAdminDataToLogin() {
     return {
-        ...this.getValidAdminToCreate(),
-        isAdmin: undefined,
+      ...this.getValidAdminToCreate(),
+      isAdmin: undefined,
     };
   }
 

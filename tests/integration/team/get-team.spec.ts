@@ -29,7 +29,10 @@ describe("GET /teams/:teamId", () => {
     await USER_SERVICE.createUser(UserMock.getValidAdminToCreate());
     adminLoginInfo = await AUTH_SERVICE.login({ ...UserMock.getValidAdminDataToLogin() });
 
-    createdTeam = await TEAM_SERVICE.createTeam(TeamMock.getValidTeamToCreate(), adminLoginInfo.user.id);
+    createdTeam = await TEAM_SERVICE.createTeam(
+      TeamMock.getValidTeamToCreate(),
+      adminLoginInfo.user.id,
+    );
   });
 
   afterAll(async () => {
@@ -49,9 +52,9 @@ describe("GET /teams/:teamId", () => {
 
   it("[400] - Get team with invalid ID format in request object", async () => {
     const res = await request(app)
-        .get(`/teams/abcd`)
-        .set({ authorization: `Bearer ${adminLoginInfo.token}`, "Content-Type": "application/json" })
-        .expect(C.HttpStatusCode.BAD_REQUEST);
+      .get(`/teams/abcd`)
+      .set({ authorization: `Bearer ${adminLoginInfo.token}`, "Content-Type": "application/json" })
+      .expect(C.HttpStatusCode.BAD_REQUEST);
 
     expect(res.body).toHaveProperty("message");
     expect(res.body.data.errors).toHaveLength(1);
@@ -83,5 +86,4 @@ describe("GET /teams/:teamId", () => {
 
     expect(res.body).toHaveProperty("message", "Team not found!");
   });
-
 });

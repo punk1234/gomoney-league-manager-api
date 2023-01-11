@@ -3,23 +3,26 @@ import request from "supertest";
 import { Application } from "express";
 import C from "../../../src/constants";
 import { UserMock } from "../../__mocks__";
-import { LoginResponse } from "../../../src/models";
+import { FixtureStatus, LoginResponse } from "../../../src/models";
 import AppFactory from "../../__helpers__/app-factory.helper";
 import { UserService } from "../../../src/services/user.service";
 import { AuthService } from "../../../src/services/auth.service";
-import { TeamMock } from "../../__mocks__/team.mock";
-import { TeamService } from "../../../src/services/team.service";
 import { ITeam } from "../../../src/database/types/team.type";
+import { TeamService } from "../../../src/services/team.service";
+import { TeamMock } from "../../__mocks__/team.mock";
+import { FixtureService } from "../../../src/services/fixture.service";
 
 const USER_SERVICE = Container.get(UserService);
 const AUTH_SERVICE = Container.get(AuthService);
 const TEAM_SERVICE = Container.get(TeamService);
+const FIXTURE_SERVICE = Container.get(FixtureService);
 
 let app: Application;
 let userLoginInfo: LoginResponse, adminLoginInfo: LoginResponse;
-let createdTeam: ITeam;
+let createdTeams: Array<ITeam>;
+let createdFixture: any;
 
-describe("DELETE /teams/:teamId", () => {
+describe("GET /fixtures/:fixtureId", () => {
   beforeAll(async () => {
     app = await AppFactory.create();
 
@@ -29,8 +32,17 @@ describe("DELETE /teams/:teamId", () => {
     await USER_SERVICE.createUser(UserMock.getValidAdminToCreate());
     adminLoginInfo = await AUTH_SERVICE.login({ ...UserMock.getValidAdminDataToLogin() });
 
-    createdTeam = await TEAM_SERVICE.createTeam(
-      TeamMock.getValidTeamToCreate(),
+    const TEAMS = TeamMock.getTeams();
+    createdTeams = await Promise.all(
+      TEAMS.map((team: any) => TEAM_SERVICE.createTeam(team, adminLoginInfo.user.id)),
+    );
+
+    createdFixture = await FIXTURE_SERVICE.createFixture(
+      {
+        homeTeamId: createdTeams[0]._id,
+        awayTeamId: createdTeams[1]._id,
+        commencesAt: new Date(Date.now() + 3_600_000), // NEXT 1HR
+      },
       adminLoginInfo.user.id,
     );
   });
@@ -39,50 +51,48 @@ describe("DELETE /teams/:teamId", () => {
     await AppFactory.destroy();
   });
 
-  // FIX TRANSACTION ISSUE
-  //   it("[200] - Delete team with valid ID", async () => {
-  //     const res = await request(app)
-  //       .delete(`/teams/${createdTeam._id}`)
-  //       .set({ authorization: `Bearer ${adminLoginInfo.token}`, "Content-Type": "application/json" })
-  //       .expect(C.HttpStatusCode.SUCCESS);
-
-  //     expect(res.body).toHaveProperty("success", true);
-  //   });
-
-  it("[400] - Delete team with invalid ID format in request object", async () => {
+  it("[200] - Get fixture with valid data", async () => {
     const res = await request(app)
-      .delete(`/teams/abcd`)
+      .get(`/fixtures/${createdFixture._id}`)
       .set({ authorization: `Bearer ${adminLoginInfo.token}`, "Content-Type": "application/json" })
-      .expect(C.HttpStatusCode.BAD_REQUEST);
+      .expect(C.HttpStatusCode.SUCCESS);
 
-    expect(res.body).toHaveProperty("message");
-    expect(res.body.data.errors).toHaveLength(1);
-    expect(res.body.data.errors[0].path).toEqual("/params/teamId");
+    expect(res.body).toHaveProperty("id");
+    expect(res.body).toHaveProperty("commencesAt");
+    expect(res.body).toHaveProperty("homeTeamId", createdFixture.homeTeamId.toString());
+    expect(res.body).toHaveProperty("awayTeamId", createdFixture.awayTeamId.toString());
+    expect(res.body).toHaveProperty("status", FixtureStatus.PENDING);
   });
 
-  it("[401] - Delete team without auth-token", async () => {
+  it("[400] - Get fixture with invalid ID format in request object", async () => {
+    const res = await request(app).get("/fixtures/abcd").expect(C.HttpStatusCode.BAD_REQUEST);
+
+    expect(res.body).toHaveProperty("message");
+  });
+
+  it("[401] - Get fixture without auth-token", async () => {
     const res = await request(app)
-      .delete(`/teams/${createdTeam._id}`)
+      .get(`/fixtures/${createdFixture._id}`)
       .expect(C.HttpStatusCode.UNAUTHENTICATED);
 
     expect(res.body).toHaveProperty("message", "Invalid token!");
   });
 
-  it("[403] - Delete team without being an admin", async () => {
+  it("[403] - Get fixture without being an admin", async () => {
     const res = await request(app)
-      .delete(`/teams/${createdTeam._id}`)
+      .get(`/fixtures/${createdFixture._id}`)
       .set({ authorization: `Bearer ${userLoginInfo.token}`, "Content-Type": "application/json" })
       .expect(C.HttpStatusCode.UNAUTHORIZED);
 
     expect(res.body).toHaveProperty("message", C.ResponseMessage.ERR_UNAUTHORIZED);
   });
 
-  it("[404] - Delete team with ID that does not exist", async () => {
+  it("[404] - Get fixture with ID that does not exist", async () => {
     const res = await request(app)
-      .delete(`/teams/abcd1234abcd1234abcd1234`)
+      .get("/fixtures/abcd1234abcd1234abcd1234")
       .set({ authorization: `Bearer ${adminLoginInfo.token}`, "Content-Type": "application/json" })
       .expect(C.HttpStatusCode.NOT_FOUND);
 
-    expect(res.body).toHaveProperty("message", "Team not found!");
+    expect(res.body).toHaveProperty("message", "Fixture not found!");
   });
 });
