@@ -17,8 +17,7 @@ export class TeamService {
    * @returns {Promise<ITeam>}
    */
   async createTeam(data: CreateTeamDto, actionBy: string): Promise<ITeam> {
-    // ALSO, teamName can allow whitespace that should be trimmed <CHECK API-SPEC for validation>
-    if ((data.name = data.name.trim()) && !data.name.length) {
+    if ((data.name = data.name.trim()) && !data.name) {
       throw new BadRequestError("Invalid value for team-name!");
     }
 
@@ -46,11 +45,11 @@ export class TeamService {
       { new: true },
     );
 
-    if (!UPDATED_TEAM) {
-      throw new ServerError(C.ResponseMessage.ERR_SERVER);
+    if (UPDATED_TEAM) {
+      return UPDATED_TEAM;
     }
 
-    return UPDATED_TEAM;
+    throw new ServerError(C.ResponseMessage.ERR_SERVER);
   }
 
   /**
@@ -162,65 +161,21 @@ export class TeamService {
       FILTERS.push({ name: new RegExp(`^${data.name}$`, "i") });
     }
 
-    // TODO: UPDATE API-SPEC for TEAM-CODE pattern of `[a-zA-Z]{3,3}`
     if (data.code) {
       FILTERS.push({ code: data.code });
     }
 
-    // ANY PERFORMANCE IMPACT ON USING $or WITH ONLY 1 ITEM ??
-    if (FILTERS.length) {
-      const FOUND_TEAMS = await TeamModel.find({ $or: FILTERS });
+    if (!FILTERS.length) {
+      return;
+    }
 
-      if (
-        FOUND_TEAMS.length > 1 ||
-        (FOUND_TEAMS.length == 1 && FOUND_TEAMS[0]._id.toString() !== teamId)
-      ) {
-        throw new ConflictError("Team already exist!");
-      }
+    const FOUND_TEAMS = await TeamModel.find({ $or: FILTERS });
+
+    if (
+      FOUND_TEAMS.length > 1 ||
+      (FOUND_TEAMS.length == 1 && FOUND_TEAMS[0]._id.toString() !== teamId)
+    ) {
+      throw new ConflictError("Team already exist!");
     }
   }
-
-  //   /**
-  //    * @method createTeam
-  //    * @async
-  //    * @param {CreateTeamDto} data
-  //    * @param {string} createdBy
-  //    * @returns {Promise<ITeam>}
-  //    */
-  //   async createTeam(data: CreateTeamDto, createdBy: string): Promise<ITeam> {
-  //     // NOTE: CURRENT IMPLEMENTATION ALLOWS FOR CASE ISSUE (i.e `Arsenal` & `ARSENAL` can be created)
-  //     // ALSO, teamName can allow whitespace that should be trimmed <CHECK API-SPEC for validation>
-  //     try {
-  //       const TEAM = new TeamModel({ ...data, createdBy });
-  //       return await TEAM.save();
-  //     } catch (err: any) {
-  //       this.handleDbUniqueConstraintError(err, "Team", "name");
-  //       this.handleDbUniqueConstraintError(err, "Team", "code");
-
-  //       throw err;
-  //     }
-  //   }
-
-  //   /**
-  //    * @method handleDbUniqueConstraintError
-  //    * @param {any} err
-  //    * @param {string} entity
-  //    * @param {string} possibleConstraintField
-  //    */
-  //   // TODO: MOVE TO DB-HELPER CLASS & ALSO SUPPORT ARRAY
-  //   private handleDbUniqueConstraintError(
-  //     err: any,
-  //     entity: string,
-  //     possibleConstraintField: string,
-  //   ): void {
-  //     if (
-  //       err.name == "MongoServerError" &&
-  //       err.code === 11000 &&
-  //       err.keyPattern[possibleConstraintField]
-  //     ) {
-  //       throw new ConflictError(
-  //         `${entity} ${possibleConstraintField} '${err.keyValue[possibleConstraintField]}' already exist!`,
-  //       );
-  //     }
-  //   }
 }
