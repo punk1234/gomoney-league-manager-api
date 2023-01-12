@@ -55,8 +55,27 @@ export class FixtureService {
     }
 
     const FIXTURE = await this.checkThatFixtureExist(fixtureId);
+    await this.checkThatFixtureCanBeUpdated(FIXTURE, data);
 
-    let { homeTeamId, awayTeamId } = FIXTURE;
+    const status = data.matchResult ? FixtureStatus.COMPLETED : FIXTURE.status;
+    const UPDATED_FIXTURE = await FixtureModel.findOneAndUpdate(
+      { _id: fixtureId },
+      { ...data, updatedBy: actionBy, status },
+      { new: true },
+    );
+
+    if (UPDATED_FIXTURE) {
+      return UPDATED_FIXTURE;
+    }
+
+    throw new ServerError(C.ResponseMessage.ERR_SERVER);
+  }
+
+  private async checkThatFixtureCanBeUpdated(
+    fixture: IFixture,
+    data: UpdateFixtureDto,
+  ): Promise<void> {
+    let { homeTeamId, awayTeamId } = fixture;
     const FILTERS: Array<string> = [];
 
     if (data.homeTeamId) {
@@ -72,26 +91,10 @@ export class FixtureService {
     }
 
     if (FILTERS.length) {
-      // NOTE: IF WE HAVE 1 ITEM, AND IT DOES NOT EXIST, ERROR MSG MIGHT BE INVALID SAYING `ONE OR MORE...`
+      // NOTE: IF WE HAVE 1 ITEM, AND IT DOES NOT EXIST, ERROR MSG MIGHT SAY `ONE OR MORE...`
       await this.teamService.checkThatTeamsExist(FILTERS);
       await this.checkThatFixtureDoesNotExist(homeTeamId, awayTeamId);
     }
-
-    const UPDATED_FIXTURE = await FixtureModel.findOneAndUpdate(
-      { _id: fixtureId },
-      {
-        ...data,
-        updatedBy: actionBy,
-        status: data.matchResult ? FixtureStatus.COMPLETED : FixtureStatus.COMPLETED,
-      },
-      { new: true },
-    );
-
-    if (UPDATED_FIXTURE) {
-      return UPDATED_FIXTURE;
-    }
-
-    throw new ServerError(C.ResponseMessage.ERR_SERVER);
   }
 
   /**
