@@ -77,11 +77,13 @@ export class FixtureService {
       await this.checkThatFixtureDoesNotExist(homeTeamId, awayTeamId);
     }
 
-    // TODO: HANDLE MATCH-RESULT UPDATE
-
     const UPDATED_FIXTURE = await FixtureModel.findOneAndUpdate(
       { _id: fixtureId },
-      { ...data, updatedBy: actionBy },
+      {
+        ...data,
+        updatedBy: actionBy,
+        status: data.matchResult ? FixtureStatus.COMPLETED : FixtureStatus.COMPLETED,
+      },
       { new: true },
     );
 
