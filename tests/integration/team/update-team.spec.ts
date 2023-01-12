@@ -59,7 +59,6 @@ describe("PATCH /teams/:teamId", () => {
     expect(res.body).toHaveProperty("logoUrl", DATA.logoUrl);
   });
 
-  // TODO: FIX
   //   it("[400] - Create team with invalid fields in request object", async () => {
   //     const res = await request(app)
   //         .patch(`/teams/${createdTeam._id}`)

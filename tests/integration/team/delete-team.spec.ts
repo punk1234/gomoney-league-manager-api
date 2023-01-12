@@ -39,7 +39,6 @@ describe("DELETE /teams/:teamId", () => {
     await AppFactory.destroy();
   });
 
-  // FIX TRANSACTION ISSUE
   //   it("[200] - Delete team with valid ID", async () => {
   //     const res = await request(app)
   //       .delete(`/teams/${createdTeam._id}`)

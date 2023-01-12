@@ -60,7 +60,6 @@ describe("GET /teams", () => {
 
   it("[400] - Get team-list with invalid query filter", async () => {
     const res = await request(app)
-      //   .get(`/teams?searchValue=&page=xyz&limit=abc`)
       .get(`/teams?searchValue=`)
       .set({ authorization: `Bearer ${adminLoginInfo.token}`, "Content-Type": "application/json" })
       .expect(C.HttpStatusCode.BAD_REQUEST);
@@ -68,8 +67,6 @@ describe("GET /teams", () => {
     expect(res.body).toHaveProperty("message");
     expect(res.body.data.errors).toHaveLength(1);
     expect(res.body.data.errors[0].path).toEqual("/query/searchValue");
-    // expect(res.body.data.errors[1].path).toEqual("/query/page");
-    // expect(res.body.data.errors[2].path).toEqual("/query/limit");
   });
 
   it("[401] - Get team-list with missing token", async () => {
