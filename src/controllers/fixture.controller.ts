@@ -4,6 +4,7 @@ import { Request, Response } from "express";
 import { ResponseHandler } from "../helpers";
 import { CreateFixtureDto, FixtureStatus, UpdateFixtureDto } from "../models";
 import { FixtureService } from "../services/fixture.service";
+import config from "../config";
 
 @Service()
 @Controller()
@@ -103,5 +104,17 @@ export class FixtureController {
     await this.fixtureService.removeFixture(req.params.fixtureId);
 
     ResponseHandler.ok(res, { success: true });
+  }
+
+  /**
+   * @method generateFixtureUniqueLink
+   * @async
+   * @param {Request} req
+   * @param {Response} res
+   */
+  async generateFixtureUniqueLink(req: Request, res: Response) {
+    const FIXTURE_LINK_CODE = await this.fixtureService.generateFixtureUniqueLinkCode(req.params.fixtureId);
+
+    ResponseHandler.ok(res, { link: `${config.FIXTURE_LINK_BASE_URL}/${FIXTURE_LINK_CODE}` });
   }
 }
