@@ -27,3 +27,8 @@ N/A
 - API Versioning
 - Add constraints of maximum number of teams that can be added within a League
 - Logic to switch fixture status to IN_PROGRESS or ONGOING
+
+## POSTMAN DOCUMENTATION (PUBLIC URL)
+```
+https://www.postman.com/punk1234/workspace/public-akeju/collection/25312024-1073d896-9171-48c6-a02e-05d1b8cfccbe?action=share&creator=25312024
+```

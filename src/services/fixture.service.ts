@@ -110,7 +110,7 @@ export class FixtureService {
     status: FixtureStatus,
     opts: IPaginationOption,
   ): Promise<IPaginatedData<IFixture>> {
-    (opts.page ||= 1), (opts.page ||= 1);
+    (opts.page ||= 1), (opts.limit ||= 1);
 
     const [records, totalItemCount] = await Promise.all([
       this.getFixturesByStatusRecords(status, opts),
