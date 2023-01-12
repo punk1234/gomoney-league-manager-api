@@ -38,31 +38,7 @@ export class TeamService {
    */
   async updateTeam(teamId: string, data: UpdateTeamDto, actionBy: string): Promise<ITeam> {
     await this.checkThatTeamExist(teamId);
-
-    const FILTERS: Array<Record<string, any>> = [];
-
-    if ((data.name = data.name?.trim()) && !data.name?.length) {
-      throw new BadRequestError("Invalid value for team-name!");
-    } else if (data.name) {
-      FILTERS.push({ name: new RegExp(`^${data.name}$`, "i") });
-    }
-
-    // TODO: UPDATE API-SPEC for TEAM-CODE pattern of `[a-zA-Z]{3,3}`
-    if (data.code) {
-      FILTERS.push({ code: data.code });
-    }
-
-    // ANY PERFORMANCE IMPACT ON USING $or WITH ONLY 1 ITEM ??
-    if (FILTERS.length) {
-      const FOUND_TEAMS = await TeamModel.find({ $or: FILTERS });
-
-      if (
-        FOUND_TEAMS.length > 1 ||
-        (FOUND_TEAMS.length == 1 && FOUND_TEAMS[0]._id.toString() !== teamId)
-      ) {
-        throw new ConflictError("Team already exist!");
-      }
-    }
+    await this.checkThatTeamCanBeUpdated(teamId, data);
 
     const UPDATED_TEAM = await TeamModel.findOneAndUpdate(
       { _id: teamId },
@@ -98,6 +74,7 @@ export class TeamService {
 
     if (searchValue) {
       const SEARCH_VALUE_FILTER_REGEX = new RegExp(`^${searchValue}`, "i");
+
       filter = {
         $or: [{ name: SEARCH_VALUE_FILTER_REGEX }, { code: SEARCH_VALUE_FILTER_REGEX }],
       };
@@ -167,6 +144,39 @@ export class TeamService {
 
     if (FOUND_TEAM) {
       throw new ConflictError(`Team ${FOUND_TEAM.code == code ? "code" : "name"} already exist!`);
+    }
+  }
+
+  /**
+   * @method checkThatTeamCanBeUpdated
+   * @async
+   * @param {string} teamId
+   * @param {UpdateTeamDto} data
+   */
+  private async checkThatTeamCanBeUpdated(teamId: string, data: UpdateTeamDto): Promise<void> {
+    const FILTERS: Array<Record<string, any>> = [];
+
+    if ((data.name = data.name?.trim()) && !data.name?.length) {
+      throw new BadRequestError("Invalid value for team-name!");
+    } else if (data.name) {
+      FILTERS.push({ name: new RegExp(`^${data.name}$`, "i") });
+    }
+
+    // TODO: UPDATE API-SPEC for TEAM-CODE pattern of `[a-zA-Z]{3,3}`
+    if (data.code) {
+      FILTERS.push({ code: data.code });
+    }
+
+    // ANY PERFORMANCE IMPACT ON USING $or WITH ONLY 1 ITEM ??
+    if (FILTERS.length) {
+      const FOUND_TEAMS = await TeamModel.find({ $or: FILTERS });
+
+      if (
+        FOUND_TEAMS.length > 1 ||
+        (FOUND_TEAMS.length == 1 && FOUND_TEAMS[0]._id.toString() !== teamId)
+      ) {
+        throw new ConflictError("Team already exist!");
+      }
     }
   }
 

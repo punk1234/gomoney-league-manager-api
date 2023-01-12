@@ -55,33 +55,12 @@ export class FixtureService {
     }
 
     const FIXTURE = await this.checkThatFixtureExist(fixtureId);
+    await this.checkThatFixtureCanBeUpdated(FIXTURE, data);
 
-    let { homeTeamId, awayTeamId } = FIXTURE;
-    const FILTERS: Array<string> = [];
-
-    if (data.homeTeamId) {
-      FILTERS.push(data.homeTeamId) && (homeTeamId = data.homeTeamId);
-    }
-
-    if (data.awayTeamId) {
-      FILTERS.push(data.awayTeamId) && (awayTeamId = data.awayTeamId);
-    }
-
-    if (homeTeamId == awayTeamId) {
-      throw new ConflictError("Home & away teams cannot be the same!");
-    }
-
-    if (FILTERS.length) {
-      // NOTE: IF WE HAVE 1 ITEM, AND IT DOES NOT EXIST, ERROR MSG MIGHT BE INVALID SAYING `ONE OR MORE...`
-      await this.teamService.checkThatTeamsExist(FILTERS);
-      await this.checkThatFixtureDoesNotExist(homeTeamId, awayTeamId);
-    }
-
-    // TODO: HANDLE MATCH-RESULT UPDATE
-
+    const status = data.matchResult ? FixtureStatus.COMPLETED : FIXTURE.status;
     const UPDATED_FIXTURE = await FixtureModel.findOneAndUpdate(
       { _id: fixtureId },
-      { ...data, updatedBy: actionBy },
+      { ...data, updatedBy: actionBy, status },
       { new: true },
     );
 
@@ -230,6 +209,38 @@ export class FixtureService {
   }
 
   /**
+   * @method checkThatFixtureCanBeUpdated
+   * @async
+   * @param {IFixture} fixture
+   * @param {UpdateFixtureDto} data
+   */
+  private async checkThatFixtureCanBeUpdated(
+    fixture: IFixture,
+    data: UpdateFixtureDto,
+  ): Promise<void> {
+    let { homeTeamId, awayTeamId } = fixture;
+    const FILTERS: Array<string> = [];
+
+    if (data.homeTeamId) {
+      FILTERS.push(data.homeTeamId) && (homeTeamId = data.homeTeamId);
+    }
+
+    if (data.awayTeamId) {
+      FILTERS.push(data.awayTeamId) && (awayTeamId = data.awayTeamId);
+    }
+
+    if (homeTeamId == awayTeamId) {
+      throw new ConflictError("Home & away teams cannot be the same!");
+    }
+
+    if (FILTERS.length) {
+      // NOTE: IF WE HAVE 1 ITEM, AND IT DOES NOT EXIST, ERROR MSG MIGHT SAY `ONE OR MORE...`
+      await this.teamService.checkThatTeamsExist(FILTERS);
+      await this.checkThatFixtureDoesNotExist(homeTeamId, awayTeamId);
+    }
+  }
+
+  /**
    * @method getFixturesByStatusRecords
    * @async
    * @param {FixtureStatus} status
@@ -240,7 +251,7 @@ export class FixtureService {
     status: FixtureStatus,
     opts: IPaginationOption,
   ): Promise<Array<any>> {
-    const LOOKUP_DATA = { from: "teams", foreignField: "_id" };
+    const [PROJECTIONS, LOOKUP_DATA] = this.getFixtureProjectionsAndLookups();
 
     return FixtureModel.aggregate([
       { $match: { status } },
@@ -248,21 +259,8 @@ export class FixtureService {
       { $skip: (Number(opts.page) - 1) * Number(opts.limit) },
       { $limit: Number(opts.limit) },
 
-      { $lookup: { ...LOOKUP_DATA, localField: "homeTeamId", as: "homeTeam" } },
-      { $lookup: { ...LOOKUP_DATA, localField: "awayTeamId", as: "awayTeam" } },
-
-      {
-        $project: {
-          _id: 0,
-          id: "$_id",
-          homeTeam: { $first: "$homeTeam.name" },
-          awayTeam: { $first: "$awayTeam.name" },
-          status: 1,
-          commencesAt: 1,
-          matchResult: 1,
-          createdAt: 1,
-        },
-      },
+      ...LOOKUP_DATA,
+      PROJECTIONS,
     ]);
   }
 
@@ -281,46 +279,17 @@ export class FixtureService {
       $lte: new Date(`${date}T23:59:59.999Z`),
     };
 
-    const teamFilter = [];
-
-    // TODO: PROBABLY CREATE A METHOD IN TEAM-SERVICE AS THIS LOOKS LIKE A DUPLICATE
-    if (searchValue) {
-      const SEARCH_VALUE_FILTER_REGEX = new RegExp(`^${searchValue}`, "i");
-
-      teamFilter.push({
-        $match: {
-          $or: [
-            { "homeTeam.name": SEARCH_VALUE_FILTER_REGEX },
-            { "homeTeam.code": SEARCH_VALUE_FILTER_REGEX },
-            { "awayTeam.name": SEARCH_VALUE_FILTER_REGEX },
-            { "awayTeam.code": SEARCH_VALUE_FILTER_REGEX },
-          ],
-        },
-      });
-    }
-
-    const LOOKUP_DATA = { from: "teams", foreignField: "_id" };
+    const teamFilter = this.getSearchValueQuery(searchValue);
+    const [PROJECTIONS, LOOKUP_DATA] = this.getFixtureProjectionsAndLookups();
 
     return FixtureModel.aggregate([
       { $match: filter },
       { $sort: { commencesAt: 1 } },
 
-      { $lookup: { ...LOOKUP_DATA, localField: "homeTeamId", as: "homeTeam" } },
-      { $lookup: { ...LOOKUP_DATA, localField: "awayTeamId", as: "awayTeam" } },
+      ...LOOKUP_DATA,
       ...(teamFilter as any),
 
-      {
-        $project: {
-          _id: 0,
-          id: "$_id",
-          homeTeam: { $first: "$homeTeam.name" },
-          awayTeam: { $first: "$awayTeam.name" },
-          status: 1,
-          commencesAt: 1,
-          matchResult: 1,
-          createdAt: 1,
-        },
-      },
+      PROJECTIONS,
     ]);
   }
 
@@ -342,33 +311,34 @@ export class FixtureService {
       };
     }
 
-    const teamFilter = [];
-
-    // TODO: PROBABLY CREATE A METHOD IN TEAM-SERVICE AS THIS LOOKS LIKE A DUPLICATE
-    if (searchValue) {
-      const SEARCH_VALUE_FILTER_REGEX = new RegExp(`^${searchValue}`, "i");
-
-      teamFilter.push({
-        $match: {
-          $or: [
-            { "homeTeam.name": SEARCH_VALUE_FILTER_REGEX },
-            { "homeTeam.code": SEARCH_VALUE_FILTER_REGEX },
-            { "awayTeam.name": SEARCH_VALUE_FILTER_REGEX },
-            { "awayTeam.code": SEARCH_VALUE_FILTER_REGEX },
-          ],
-        },
-      });
-    }
-
-    const LOOKUP_DATA = { from: "teams", foreignField: "_id" };
+    const teamFilter = this.getSearchValueQuery(searchValue);
+    const [PROJECTIONS, LOOKUP_DATA] = this.getFixtureProjectionsAndLookups();
 
     return FixtureModel.aggregate([
       { $match: filter },
       { $sort: { commencesAt: 1 } },
-      { $lookup: { ...LOOKUP_DATA, localField: "homeTeamId", as: "homeTeam" } },
-      { $lookup: { ...LOOKUP_DATA, localField: "awayTeamId", as: "awayTeam" } },
+      ...LOOKUP_DATA,
       ...(teamFilter as any),
+      PROJECTIONS,
 
+      {
+        $facet: {
+          data: [{ $skip: (Number(page) - 1) * Number(limit) }, { $limit: Number(limit) }],
+          filterCount: [{ $count: "count" }],
+        },
+      },
+    ]);
+  }
+
+  /**
+   * @method getFixtureProjectionsAndLookups
+   * @instance
+   * @returns {Array<any>}
+   */
+  private getFixtureProjectionsAndLookups(): Array<any> {
+    const LOOKUP_DATA = { from: "teams", foreignField: "_id" };
+
+    return [
       {
         $project: {
           _id: 0,
@@ -382,12 +352,37 @@ export class FixtureService {
         },
       },
 
+      [
+        { $lookup: { ...LOOKUP_DATA, localField: "homeTeamId", as: "homeTeam" } },
+        { $lookup: { ...LOOKUP_DATA, localField: "awayTeamId", as: "awayTeam" } },
+      ],
+    ];
+  }
+
+  /**
+   * @method getSearchValueQuery
+   * @instance
+   * @param {string} searchValue
+   * @returns {Array<*>}
+   */
+  private getSearchValueQuery(searchValue: string): Array<any> {
+    if (!searchValue) {
+      return [];
+    }
+
+    const SEARCH_VALUE_FILTER_REGEX = new RegExp(`^${searchValue}`, "i");
+
+    return [
       {
-        $facet: {
-          data: [{ $skip: (Number(page) - 1) * Number(limit) }, { $limit: Number(limit) }],
-          filterCount: [{ $count: "count" }],
+        $match: {
+          $or: [
+            { "homeTeam.name": SEARCH_VALUE_FILTER_REGEX },
+            { "homeTeam.code": SEARCH_VALUE_FILTER_REGEX },
+            { "awayTeam.name": SEARCH_VALUE_FILTER_REGEX },
+            { "awayTeam.code": SEARCH_VALUE_FILTER_REGEX },
+          ],
         },
       },
-    ]);
+    ];
   }
 }
