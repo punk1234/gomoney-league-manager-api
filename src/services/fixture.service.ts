@@ -176,39 +176,6 @@ export class FixtureService {
   }
 
   /**
-   * @method checkThatFixtureDoesNotExist
-   * @async
-   * @param {string} homeTeamId
-   * @param {string} awayTeamId
-   */
-  private async checkThatFixtureDoesNotExist(
-    homeTeamId: string,
-    awayTeamId: string,
-  ): Promise<void> {
-    const FIXTURE = await FixtureModel.findOne({ homeTeamId, awayTeamId });
-
-    if (FIXTURE) {
-      throw new ConflictError("Fixture already exist!");
-    }
-  }
-
-  /**
-   * @method checkThatFixtureExist
-   * @async
-   * @param {string} fixtureId
-   * @returns {Promise<IFixture>}
-   */
-  private async checkThatFixtureExist(fixtureId: string): Promise<IFixture> {
-    const FIXTURE = await FixtureModel.findById(fixtureId);
-
-    if (FIXTURE) {
-      return FIXTURE;
-    }
-
-    throw new NotFoundError("Fixture not found!");
-  }
-
-  /**
    * @method checkThatFixtureCanBeUpdated
    * @async
    * @param {IFixture} fixture
@@ -236,7 +203,58 @@ export class FixtureService {
     if (FILTERS.length) {
       // NOTE: IF WE HAVE 1 ITEM, AND IT DOES NOT EXIST, ERROR MSG MIGHT SAY `ONE OR MORE...`
       await this.teamService.checkThatTeamsExist(FILTERS);
-      await this.checkThatFixtureDoesNotExist(homeTeamId, awayTeamId);
+      const FOUND_FIXTURE = await this.getFixtureByTeams(homeTeamId, awayTeamId);
+
+      if (FOUND_FIXTURE && FOUND_FIXTURE._id.toString() !== fixture._id.toString()) {
+        throw new ConflictError("Fixture already exist!");
+      }
+    }
+  }
+
+  /**
+   * @method getFixtureByTeams
+   * @async
+   * @param {string} homeTeamId
+   * @param {string} awayTeamId
+   * @returns {Promise<IFixture | null>}
+   */
+  private async getFixtureByTeams(
+    homeTeamId: string,
+    awayTeamId: string,
+  ): Promise<IFixture | null> {
+    return FixtureModel.findOne({ homeTeamId, awayTeamId });
+  }
+
+  /**
+   * @method checkThatFixtureExist
+   * @async
+   * @param {string} fixtureId
+   * @returns {Promise<IFixture>}
+   */
+  private async checkThatFixtureExist(fixtureId: string): Promise<IFixture> {
+    const FIXTURE = await FixtureModel.findById(fixtureId);
+
+    if (FIXTURE) {
+      return FIXTURE;
+    }
+
+    throw new NotFoundError("Fixture not found!");
+  }
+
+  /**
+   * @method checkThatFixtureDoesNotExist
+   * @async
+   * @param {string} homeTeamId
+   * @param {string} awayTeamId
+   */
+  private async checkThatFixtureDoesNotExist(
+    homeTeamId: string,
+    awayTeamId: string,
+  ): Promise<void> {
+    const FIXTURE = await FixtureModel.findOne({ homeTeamId, awayTeamId });
+
+    if (FIXTURE) {
+      throw new ConflictError("Fixture already exist!");
     }
   }
 
