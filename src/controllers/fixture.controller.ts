@@ -113,7 +113,9 @@ export class FixtureController {
    * @param {Response} res
    */
   async generateFixtureUniqueLink(req: Request, res: Response) {
-    const FIXTURE_LINK_CODE = await this.fixtureService.generateFixtureUniqueLinkCode(req.params.fixtureId);
+    const FIXTURE_LINK_CODE = await this.fixtureService.generateFixtureUniqueLinkCode(
+      req.params.fixtureId,
+    );
 
     ResponseHandler.ok(res, { link: `${config.FIXTURE_LINK_BASE_URL}/${FIXTURE_LINK_CODE}` });
   }

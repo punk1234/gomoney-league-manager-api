@@ -109,7 +109,6 @@ export default async function main(): Promise<void> {
 
     Logger.info("SEEDING COMPLETED SUCCESSFULLY!");
   } catch (err: any) {
-      
     Logger.error(`[SEEDING FAILED]: ${err.message}`);
     process.exit(1);
   }

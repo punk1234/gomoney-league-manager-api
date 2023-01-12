@@ -190,7 +190,8 @@ export class FixtureService {
   async generateFixtureUniqueLinkCode(fixtureId: string): Promise<string> {
     const FIXTURE = await this.checkThatFixtureExist(fixtureId);
 
-    return Buffer.from(FIXTURE._id.toString(), "hex").toString("base64")
+    return Buffer.from(FIXTURE._id.toString(), "hex")
+      .toString("base64")
       .replace(/\+/g, "_")
       .replace(/\//g, "-");
   }
