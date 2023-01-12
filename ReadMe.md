@@ -34,4 +34,4 @@ https://www.postman.com/punk1234/workspace/public-akeju/collection/25312024-1073
 ```
 
 ## API-SPEC DISPLAY
-![API-SPEC DISPLAY](docs/open-api-doc.png)
+![API-SPEC DISPLAY](./docs/open-api-doc.png)
