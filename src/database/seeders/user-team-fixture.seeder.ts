@@ -22,7 +22,7 @@ const anyUserExist = async (): Promise<boolean> => {
 /**
  * @function getFixturesData
  * @param {Array<ITeam>} teams
- * @returns
+ * @returns {Array<CreateFixtureDto>}
  */
 const getFixturesData = (teams: Array<ITeam>): Array<CreateFixtureDto> => {
   const MAX_HOME_MATCH_PER_TEAM = 3;
@@ -106,7 +106,7 @@ export default async function main(): Promise<void> {
     const FIXTURES_DATA = getFixturesData(TEAMS);
 
     await seedFixtures(FIXTURES_DATA);
-    
+
     Logger.info("SEEDING COMPLETED SUCCESSFULLY!");
   } catch (err: any) {
       

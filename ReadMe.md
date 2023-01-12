@@ -15,6 +15,7 @@ N/A
 - Redis (Caching)
 - Docker
 - Postman
+- Supertest & Jest (Testing)
 
 ## ASSUMPTIONS
 - N/A
