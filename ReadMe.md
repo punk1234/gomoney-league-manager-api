@@ -18,7 +18,7 @@ N/A
 - Supertest & Jest (Testing)
 
 ## ASSUMPTIONS
-- N/A
+- Fixture `status` only changes when a fixture-update has `match-result` (Status changes from `PENDING` to `COMPLETED`)
 
 ## OPTIMIZATIONS
 - N/A

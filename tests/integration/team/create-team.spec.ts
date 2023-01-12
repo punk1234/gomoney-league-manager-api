@@ -53,7 +53,6 @@ describe("POST /teams", () => {
     expect(res.body.data.errors[1].path).toEqual("/body/code");
   });
 
-  // TODO: FIX
   //   it("[400] - Create team with invalid fields in request object", async () => {
   //     const res = await request(app)
   //         .post("/teams")
