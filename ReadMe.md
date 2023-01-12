@@ -32,3 +32,6 @@ N/A
 ```
 https://www.postman.com/punk1234/workspace/public-akeju/collection/25312024-1073d896-9171-48c6-a02e-05d1b8cfccbe?action=share&creator=25312024
 ```
+
+## API-SPEC DISPLAY
+![API-SPEC DISPLAY](docs/open-api-doc.png)
