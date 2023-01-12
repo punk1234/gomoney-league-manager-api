@@ -11,6 +11,7 @@ const _checkThatValidTokenFormatIsProvided = (authToken: string | undefined): st
   let splitToken;
 
   if (
+    // NOTE: CAN ALSO USE `startsWith("Bearer ")` here
     !authToken ||
     (splitToken = authToken.split(" ")).length !== 2 ||
     splitToken[0].toLowerCase() !== "bearer" ||

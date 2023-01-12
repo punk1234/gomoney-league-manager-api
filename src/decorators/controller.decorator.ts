@@ -4,6 +4,7 @@ export default function () {
       properties = Object.getOwnPropertyNames(target.prototype).filter(
         (mN: string) => mN !== "constructor",
       );
+
       constructor(...arg: any[]) {
         super(...arg);
 

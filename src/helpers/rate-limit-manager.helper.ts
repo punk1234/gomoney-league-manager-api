@@ -18,6 +18,7 @@ export class RateLimitManager {
     if (!userId) {
       throw new Error("Invalid user identifier");
     }
+
     return `${rateLimitType}_${userId}`;
   }
 

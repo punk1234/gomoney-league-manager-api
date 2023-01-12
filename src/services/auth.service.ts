@@ -44,7 +44,7 @@ export class AuthService {
     const AUTH_TOKEN_PAYLOAD = this.generateUserAuthTokenPayload(USER);
     const AUTH_TOKEN = JwtHelper.generateToken(AUTH_TOKEN_PAYLOAD, config.AUTH_TOKEN_TTL_IN_HOURS);
 
-    // TODO: HANDLE SESSION MANAGEMENT USING CACHING MECHANISM
+    // HANDLE SESSION MANAGEMENT USING CACHING MECHANISM
     RateLimitManager.reset(USER.email, C.ApiRateLimiterType.AUTH_LOGIN).catch();
     await this.sessionService.registerSession(USER._id.toString(), AUTH_TOKEN_PAYLOAD.sessionId);
 
