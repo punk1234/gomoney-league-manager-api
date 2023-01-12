@@ -182,6 +182,21 @@ export class FixtureService {
   }
 
   /**
+   * @method generateFixtureUniqueLinkCode
+   * @async
+   * @param {string} fixtureId
+   * @returns {Promise<string>}
+   */
+  async generateFixtureUniqueLinkCode(fixtureId: string): Promise<string> {
+    const FIXTURE = await this.checkThatFixtureExist(fixtureId);
+
+    return Buffer.from(FIXTURE._id.toString(), "hex")
+      .toString("base64")
+      .replace(/\+/g, "_")
+      .replace(/\//g, "-");
+  }
+
+  /**
    * @method checkThatFixtureDoesNotExist
    * @async
    * @param {string} homeTeamId

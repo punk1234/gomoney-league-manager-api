@@ -15,4 +15,5 @@ export default {
   AUTH_TOKEN_TTL_IN_HOURS: `${env.AUTH_TOKEN_TTL_IN_HOURS || "6"}h`,
 
   API_RATE_LIMITING: apiRateLimitingConfig,
+  FIXTURE_LINK_BASE_URL: env.FIXTURE_LINK_BASE_URL || "https://app.gomoney.go/football/fixtures",
 };

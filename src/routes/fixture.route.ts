@@ -15,4 +15,6 @@ router.get("/:fixtureId", requireAuth(true), controller.getFixture);
 router.patch("/:fixtureId", requireAuth(true), controller.updateFixture);
 router.delete("/:fixtureId", requireAuth(true), controller.removeFixture);
 
+router.post("/:fixtureId/generate-link", requireAuth(true), controller.generateFixtureUniqueLink);
+
 export default router;
